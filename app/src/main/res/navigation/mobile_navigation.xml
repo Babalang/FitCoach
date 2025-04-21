@@ -12,14 +12,25 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.fitcoach.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_social"
+        android:name="com.example.fitcoach.ui.Social.SocialFragment"
+        android:label="@string/title_social"
+        tools:layout="@layout/fragment_social" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.fitcoach.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_history"
+        android:name="com.example.fitcoach.ui.history.HistoryFragment"
+        android:label="@string/title_history"
+        tools:layout="@layout/fragment_history" />
+    <fragment
+        android:id="@id/navigation_music"
+        android:name="com.example.fitcoach.ui.Music.MusicFragment"
+        android:label="@string/title_music"
+        tools:layout="@layout/fragment_music" />
+    <fragment
+        android:id="@id/navigation_exercise"
+        android:name="com.example.fitcoach.ui.Exercise.ExerciseFragment"
+        android:label="@string/title_exercise"
+        tools:layout="@layout/fragment_exercise" />
+
 </navigation>

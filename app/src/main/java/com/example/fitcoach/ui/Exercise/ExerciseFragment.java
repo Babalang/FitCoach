@@ -1,4 +1,4 @@
-package com.example.fitcoach.ui.notifications;
+package com.example.fitcoach.ui.Exercise;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,22 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.fitcoach.databinding.FragmentNotificationsBinding;
+import com.example.fitcoach.databinding.FragmentExerciseBinding;
 
-public class NotificationsFragment extends Fragment {
+public class ExerciseFragment extends Fragment {
 
-    private FragmentNotificationsBinding binding;
+    private FragmentExerciseBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        NotificationsViewModel notificationsViewModel =
-                new ViewModelProvider(this).get(NotificationsViewModel.class);
+        ExerciseViewModel exerciseViewModel =
+                new ViewModelProvider(this).get(ExerciseViewModel.class);
 
-        binding = FragmentNotificationsBinding.inflate(inflater, container, false);
+        binding = FragmentExerciseBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textNotifications;
-        notificationsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        final TextView textView = binding.textExercise;
+        exerciseViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 

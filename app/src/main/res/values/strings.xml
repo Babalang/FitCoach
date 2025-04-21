@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">FitCoach</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_home">Accueil</string>
+    <string name="title_social">Social</string>
+    <string name="title_history">Historique</string>
+    <string name="title_exercise">Exercice</string>
+    <string name="title_music">Musique</string>
+
 </resources>
