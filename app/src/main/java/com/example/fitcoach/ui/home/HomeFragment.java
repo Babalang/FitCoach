@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,22 +29,26 @@ public class HomeFragment extends Fragment {
     private com.example.fitcoach.utils.CircularGauge circularGauge;
     private boolean isReceiverRegistered = false;
     private LocalBroadcastManager localBroadcastManager;
+    private int currentSteps;
+    private SharedPreferences sharedPreferences;
     private static final String TAG = "HomeFragment";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: called");
-        Toast.makeText(requireContext(), "onCreateView called", Toast.LENGTH_SHORT).show();
         HomeViewModel homeViewModel =
                 new ViewModelProvider(this).get(HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        sharedPreferences = requireContext().getSharedPreferences("step_prefs", Context.MODE_PRIVATE);
+        currentSteps = sharedPreferences.getInt("current_steps", 0);
+
         circularGauge = binding.circularGauge;
-        circularGauge.setValue(0f);
-        circularGauge.setTotal(10000f);
+        circularGauge.setValue(currentSteps);
+        circularGauge.setTotal(10000);
 
         final TextView textView = binding.textHome;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
@@ -55,14 +60,12 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         localBroadcastManager = LocalBroadcastManager.getInstance(requireContext());
-        Toast.makeText(requireContext(), "onResume called", Toast.LENGTH_SHORT).show();
         registerReceiver();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Toast.makeText(requireContext(), "onDestroyView called", Toast.LENGTH_SHORT).show();
         binding = null;
         // Désenregistrer le BroadcastReceiver
         unregisterReceiver();
@@ -71,7 +74,6 @@ public class HomeFragment extends Fragment {
     private class StepCountReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(requireContext(), "onReceive called", Toast.LENGTH_SHORT).show();
             if (StepCounterService.ACTION_STEP_COUNT_UPDATE.equals(intent.getAction())) {
                 int stepCount = intent.getIntExtra(StepCounterService.EXTRA_STEP_COUNT, 0);
                 circularGauge.setValue(stepCount);
@@ -80,22 +82,17 @@ public class HomeFragment extends Fragment {
     }
 
     private void registerReceiver() {
-        Toast.makeText(requireContext(), "registerReceiver called", Toast.LENGTH_SHORT).show();
-        if (!isReceiverRegistered && isServiceStarted()) {
+        if (!isReceiverRegistered) {
             stepCountReceiver = new StepCountReceiver();
             IntentFilter filter = new IntentFilter(StepCounterService.ACTION_STEP_COUNT_UPDATE);
-            Toast.makeText(requireContext(), "register receiver", Toast.LENGTH_SHORT).show();
             localBroadcastManager.registerReceiver(stepCountReceiver, filter);
             isReceiverRegistered = true;
-        } else {
-            Toast.makeText(requireContext(), "registerReceiver not registering : isRegistered : " + isReceiverRegistered + "isServiceStarted : " + isServiceStarted(), Toast.LENGTH_LONG).show();
         }
     }
 
+
     private void unregisterReceiver() {
-        Toast.makeText(requireContext(), "unregisterReceiver called", Toast.LENGTH_SHORT).show();
         if (isReceiverRegistered) {
-            Toast.makeText(requireContext(), "unregister receiver", Toast.LENGTH_SHORT).show();
             localBroadcastManager.unregisterReceiver(stepCountReceiver);
             isReceiverRegistered = false;
         } else {

@@ -1,10 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Couleurs de base -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gray">#FF888888</color>
+
+    <!-- Couleurs principales -->
+    <color name="colorPrimary">#FF5757</color> <!-- Accent rouge vif -->
+    <color name="colorPrimaryVariant">#D94D4D</color> <!-- Variante plus sombre -->
+    <color name="colorOnPrimary">#FFFFFF</color> <!-- Texte sur boutons rouges -->
+
+    <color name="colorSecondary">#FAD0C4</color> <!-- Rose doux en secondaire -->
+    <color name="colorOnSecondary">#000000</color>
+
+    <!-- Fond -->
+    <color name="colorBackground">#EDD1D7</color>
+    <color name="colorOnBackground">#2C2C2C</color> <!-- Texte normal -->
+
+    <!-- Utilitaires -->
+    <color name="logo_color">#FF5757</color>
+    <color name="stepGauge">#FF8A80</color> <!-- Couleur de jauge un peu plus claire -->
+
+    <color name="background">#EDD1D7</color>
+    <color name="logo_color_night">#FF5757</color>
+    <color name="stepGauge_night">#FF5757</color>
+
 </resources>

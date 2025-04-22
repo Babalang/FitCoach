@@ -19,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FitCoach"
         tools:targetApi="31"
+        android:background="@color/colorBackground"
         android:screenOrientation="portrait">
 
         <activity
@@ -29,6 +30,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".Services.StepCounterService" android:exported="false" />
+        <receiver android:name=".widget.StepWidgetProvider" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
     </application>
 
 </manifest>

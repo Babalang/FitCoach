@@ -38,12 +38,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Vérifier et demander la permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Permission déjà accordée", Toast.LENGTH_SHORT).show();
             if(!isServiceStarted){
                 startStepCounterService();
             }
         } else {
-            Toast.makeText(this, "Demande de permission", Toast.LENGTH_SHORT).show();
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, ACTIVITY_RECOGNITION_REQUEST_CODE);
         }
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -55,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startStepCounterService() {
-        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
         Intent serviceIntent = new Intent(MainActivity.this, StepCounterService.class);
         startService(serviceIntent);
         isServiceStarted = true;
@@ -64,10 +61,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Toast.makeText(this, "onRequestPermissionsResult: called", Toast.LENGTH_SHORT).show();
         if (requestCode == ACTIVITY_RECOGNITION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission accordée", Toast.LENGTH_SHORT).show();
                 if(!isServiceStarted){
                     startStepCounterService();
                 }

@@ -1,19 +1,24 @@
 package com.example.fitcoach.utils;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.fonts.FontStyle;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.core.content.ContextCompat;
+
+import com.example.fitcoach.R;
+
 public class CircularGauge extends View {
 
-    private float value = 0f;
-    private float total = 100f;
+    private int value = 0;
+    private int total = 100;
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint plein = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -36,28 +41,28 @@ public class CircularGauge extends View {
     }
 
     private void init() {
-        paint.setColor(Color.BLUE);
+        paint.setColor(ContextCompat.getColor(getContext(), R.color.stepGauge));
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(40f);
         paint.setStrokeCap(Paint.Cap.ROUND);
 
-        plein.setColor(Color.GRAY);
+        plein.setColor(ContextCompat.getColor(getContext(), R.color.gray));
         plein.setStyle(Paint.Style.STROKE);
         plein.setStrokeWidth(40f);
         plein.setStrokeCap(Paint.Cap.ROUND);
 
-        textPaint.setColor(Color.BLACK);
+        textPaint.setColor(ContextCompat.getColor(getContext(), R.color.black));
         textPaint.setTextSize(40f);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setTypeface(Typeface.DEFAULT_BOLD);
     }
 
-    public void setValue(float value) {
+    public void setValue(int value) {
         this.value = value;
         invalidate();
     }
 
-    public void setTotal(float total) {
+    public void setTotal(int total) {
         this.total = total;
         invalidate();
     }
@@ -73,9 +78,9 @@ public class CircularGauge extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        float angle = (value / total) * 220f;
-        canvas.drawArc(rect, -200f, 220f, false, plein);
-        canvas.drawArc(rect, -200f, angle, false, paint);
+        int angle = (int)(((float)value /(float)total) * 220);
+        canvas.drawArc(rect, -200, 220, false, plein);
+        canvas.drawArc(rect, -200, angle, false, paint);
         canvas.drawText(value+"/"+total, rect.centerX(), rect.centerY(),textPaint);
     }
 }

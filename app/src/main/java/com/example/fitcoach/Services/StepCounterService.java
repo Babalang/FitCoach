@@ -1,6 +1,8 @@
 package com.example.fitcoach.Services;
 
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,9 +12,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
+import android.widget.RemoteViews;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.example.fitcoach.R;
+import com.example.fitcoach.widget.StepWidgetProvider;
 
 public class StepCounterService extends Service implements SensorEventListener {
 
@@ -29,10 +34,9 @@ public class StepCounterService extends Service implements SensorEventListener {
     public void onCreate() {
         super.onCreate();
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+        stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         sharedPreferences = getSharedPreferences(STEP_PREFS, Context.MODE_PRIVATE);
         Log.d("StepCounterService", "onCreate: service created");
-        Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
         currentSteps = sharedPreferences.getInt(CURRENT_STEPS_KEY, 0);
     }
 
@@ -40,28 +44,22 @@ public class StepCounterService extends Service implements SensorEventListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (stepCounterSensor == null) {
             Log.e("StepCounterService", "Sensor not available");
-            Toast.makeText(this, "Sensor not available", Toast.LENGTH_SHORT).show();
             return START_NOT_STICKY;
         }
-        Toast.makeText(this, "onStartCommand called", Toast.LENGTH_SHORT).show();
         sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        Toast.makeText(this, "Service started", Toast.LENGTH_SHORT).show();
 
         return START_NOT_STICKY;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        Toast.makeText(this, "onSensorChanged called", Toast.LENGTH_SHORT).show();
-        if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
-            if (event.values[0] == 1.0) {
-                currentSteps++;
-                Toast.makeText(this, "onSensorChanged : step detected", Toast.LENGTH_LONG).show();
-                saveStepCount();
-            }
+        if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+            int totalSteps = (int) event.values[0];
+            currentSteps = totalSteps; // ou logique différente si tu veux faire un delta
+            saveStepCount();
+            sendStepCountUpdate();
         }
 
-        sendStepCountUpdate();
     }
 
     private void saveStepCount() {
@@ -73,7 +71,6 @@ public class StepCounterService extends Service implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         Log.d("StepCounterService", "onAccuracyChanged : accuracy changed :" + accuracy);
-        Toast.makeText(this, "onAccuracyChanged called", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -88,10 +85,27 @@ public class StepCounterService extends Service implements SensorEventListener {
     }
 
     private void sendStepCountUpdate() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(CURRENT_STEPS_KEY, currentSteps);
+        editor.apply();
+
         Intent intent = new Intent(ACTION_STEP_COUNT_UPDATE);
         intent.putExtra(EXTRA_STEP_COUNT, currentSteps);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         Log.d("StepCounterService", "sendStepCountUpdate: step count updated");
-        Toast.makeText(this, "sendStepCountUpdate called", Toast.LENGTH_SHORT).show();
+
+        updateWidget();
+    }
+
+    private void updateWidget(){
+        // Mise à jour du widget avec la nouvelle valeur
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        ComponentName componentName = new ComponentName(this, StepWidgetProvider.class);
+
+        RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_step);
+        views.setTextViewText(R.id.steps_text, String.valueOf(currentSteps));
+        views.setProgressBar(R.id.step_progress_bar, 10000, currentSteps, false);
+
+        appWidgetManager.updateAppWidget(componentName, views);
     }
 }
