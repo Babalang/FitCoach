@@ -16,6 +16,7 @@ import android.widget.RemoteViews;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.R;
 import com.example.fitcoach.widget.StepWidgetProvider;
 
@@ -29,6 +30,10 @@ public class StepCounterService extends Service implements SensorEventListener {
     private SharedPreferences sharedPreferences;
     private static final String STEP_PREFS = "step_counter_prefs";
     private static final String CURRENT_STEPS_KEY = "current_steps";
+    private static final String BASE_STEP_KEY = "base_step_count";
+    private static final String LAST_RESET_DATE_KEY = "last_reset_date";
+    private AppDataManager appDataManager;
+
 
     @Override
     public void onCreate() {
@@ -37,7 +42,11 @@ public class StepCounterService extends Service implements SensorEventListener {
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         sharedPreferences = getSharedPreferences(STEP_PREFS, Context.MODE_PRIVATE);
         Log.d("StepCounterService", "onCreate: service created");
-        currentSteps = sharedPreferences.getInt(CURRENT_STEPS_KEY, 0);
+        // Initialiser AppDataManager
+        appDataManager = AppDataManager.getInstance(getApplicationContext());
+
+        // Récupérer les données existantes depuis AppDataManager
+        currentSteps = appDataManager.getSteps();
     }
 
     @Override
@@ -55,12 +64,27 @@ public class StepCounterService extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
             int totalSteps = (int) event.values[0];
-            currentSteps = totalSteps; // ou logique différente si tu veux faire un delta
-            saveStepCount();
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            String today = getTodayDate();
+            String lastResetDate = sharedPreferences.getString(LAST_RESET_DATE_KEY, "");
+
+            int baseSteps = sharedPreferences.getInt(BASE_STEP_KEY, -1);
+
+            // Reset journalier si nécessaire
+            if (!today.equals(lastResetDate) || baseSteps == -1) {
+                editor.putInt(BASE_STEP_KEY, totalSteps);
+                editor.putString(LAST_RESET_DATE_KEY, today);
+                baseSteps = totalSteps;
+            }
+
+            currentSteps = totalSteps - baseSteps;
+            appDataManager.saveSteps(currentSteps);
+
             sendStepCountUpdate();
         }
-
     }
+
 
     private void saveStepCount() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -103,9 +127,16 @@ public class StepCounterService extends Service implements SensorEventListener {
         ComponentName componentName = new ComponentName(this, StepWidgetProvider.class);
 
         RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_step);
-        views.setTextViewText(R.id.steps_text, String.valueOf(currentSteps));
+        views.setTextViewText(R.id.steps_text, currentSteps+" pas");
         views.setProgressBar(R.id.step_progress_bar, 10000, currentSteps, false);
 
         appWidgetManager.updateAppWidget(componentName, views);
     }
+
+    private String getTodayDate() {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        return sdf.format(new java.util.Date());
+    }
+
+
 }

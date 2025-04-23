@@ -9,7 +9,20 @@
         android:id="@+id/navigation_home"
         android:name="com.example.fitcoach.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+    <action
+        android:id="@+id/action_home_to_history"
+        app:destination="@id/navigation_history"
+        app:popUpTo="@id/navigation_home"
+        app:popUpToInclusive="true"
+        app:launchSingleTop="true"/>
+        <action
+            android:id="@+id/action_home_to_exercise"
+            app:destination="@id/navigation_exercise"
+            app:popUpTo="@id/navigation_home"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_social"

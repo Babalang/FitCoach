@@ -4,54 +4,71 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
+import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.MainActivity;
+import com.example.fitcoach.R;
 import com.example.fitcoach.Services.StepCounterService;
 import com.example.fitcoach.databinding.FragmentHomeBinding;
+import com.example.fitcoach.ui.history.HistoryFragment;
+import androidx.navigation.fragment.NavHostFragment;
+
 
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private StepCountReceiver stepCountReceiver;
-    private com.example.fitcoach.utils.CircularGauge circularGauge;
     private boolean isReceiverRegistered = false;
     private LocalBroadcastManager localBroadcastManager;
-    private int currentSteps;
-    private SharedPreferences sharedPreferences;
+    private HomeViewModel homeViewModel;
     private static final String TAG = "HomeFragment";
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: called");
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
 
+        // ViewModel
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
+        // View Binding
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        sharedPreferences = requireContext().getSharedPreferences("step_prefs", Context.MODE_PRIVATE);
-        currentSteps = sharedPreferences.getInt("current_steps", 0);
+        AppDataManager appDataManager = AppDataManager.getInstance(requireContext());
+        int currentSteps = appDataManager.getSteps();  // Obtenir les pas depuis AppDataManager
+        homeViewModel.setStepCount(currentSteps); // Initialiser le ViewModel avec les données sauvegardées
 
-        circularGauge = binding.circularGauge;
-        circularGauge.setValue(currentSteps);
-        circularGauge.setTotal(10000);
+        // Observe ViewModel
+        homeViewModel.getStepCount().observe(getViewLifecycleOwner(), stepCount -> {
+            if (binding != null) {
+                binding.circularGauge.setValue(stepCount);
+                binding.circularGauge.setTotal(10000);
+                binding.stepsInfo.setText(stepCount + " / 10000 pas");
+            }
+        });
 
-        final TextView textView = binding.textHome;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        binding.cardContainerHistory.setOnClickListener(v -> {
+            NavHostFragment.findNavController(HomeFragment.this)
+                    .navigate(R.id.action_home_to_history);
+        });
+        binding.buttonBottom.setOnClickListener(v -> {
+            NavHostFragment.findNavController(HomeFragment.this)
+                    .navigate(R.id.action_home_to_exercise);
+        });
 
         return root;
     }
@@ -66,9 +83,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
-        // Désenregistrer le BroadcastReceiver
         unregisterReceiver();
+        binding = null;
     }
 
     private class StepCountReceiver extends BroadcastReceiver {
@@ -76,7 +92,13 @@ public class HomeFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             if (StepCounterService.ACTION_STEP_COUNT_UPDATE.equals(intent.getAction())) {
                 int stepCount = intent.getIntExtra(StepCounterService.EXTRA_STEP_COUNT, 0);
-                circularGauge.setValue(stepCount);
+
+                // Update ViewModel
+                homeViewModel.setStepCount(stepCount);
+
+                // Save to SharedPreferences
+                AppDataManager appDataManager = AppDataManager.getInstance(requireContext());
+                appDataManager.saveSteps(stepCount);
             }
         }
     }
@@ -90,21 +112,18 @@ public class HomeFragment extends Fragment {
         }
     }
 
-
     private void unregisterReceiver() {
         if (isReceiverRegistered) {
             localBroadcastManager.unregisterReceiver(stepCountReceiver);
             isReceiverRegistered = false;
         } else {
-            Toast.makeText(requireContext(), "unregisterReceiver not unregistering : isRegistered : " + isReceiverRegistered, Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "Receiver not registered", Toast.LENGTH_SHORT).show();
         }
     }
 
     public boolean isServiceStarted() {
-        if(getActivity() != null){
-            if (getActivity() instanceof MainActivity) {
-                return ((MainActivity) getActivity()).isServiceStarted();
-            }
+        if (getActivity() instanceof MainActivity) {
+            return ((MainActivity) getActivity()).isServiceStarted();
         }
         return false;
     }

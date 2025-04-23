@@ -5,15 +5,18 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class HomeViewModel extends ViewModel {
+    private final MutableLiveData<Integer> stepCount = new MutableLiveData<>(0);
 
-    private final MutableLiveData<String> mText;
-
-    public HomeViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("");
+    public LiveData<Integer> getStepCount() {
+        return stepCount;
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public void setStepCount(int steps) {
+        stepCount.setValue(steps);
+    }
+
+    public void incrementSteps(int value) {
+        Integer current = stepCount.getValue();
+        stepCount.setValue((current != null ? current : 0) + value);
     }
 }
