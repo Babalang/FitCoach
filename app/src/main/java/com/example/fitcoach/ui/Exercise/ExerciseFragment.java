@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,13 +81,11 @@ public class ExerciseFragment extends Fragment {
 
         // Gestion des boutons
         Button btn1 = view.findViewById(R.id.button1);
-        Button btn2 = view.findViewById(R.id.button2);
-        Button btn3 = view.findViewById(R.id.button3);
 
-        btn1.setOnClickListener(v -> Toast.makeText(ctx, "Bouton 1", Toast.LENGTH_SHORT).show());
-        btn2.setOnClickListener(v -> Toast.makeText(ctx, "Bouton 2", Toast.LENGTH_SHORT).show());
-        btn3.setOnClickListener(v -> Toast.makeText(ctx, "Bouton 3", Toast.LENGTH_SHORT).show());
-
+        btn1.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.exercise_to_choose);
+        });
         return view;
     }
 

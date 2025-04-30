@@ -16,12 +16,18 @@
         app:popUpTo="@id/navigation_home"
         app:popUpToInclusive="true"
         app:launchSingleTop="true"/>
-        <action
-            android:id="@+id/action_home_to_exercise"
-            app:destination="@id/navigation_exercise"
-            app:popUpTo="@id/navigation_home"
-            app:popUpToInclusive="true"
-            app:launchSingleTop="true"/>
+    <action
+        android:id="@+id/action_home_to_exercise"
+        app:destination="@id/navigation_exercise"
+        app:popUpTo="@id/navigation_home"
+        app:popUpToInclusive="true"
+        app:launchSingleTop="true"/>
+    <action
+        android:id="@+id/home_to_infos"
+        app:destination="@id/infos"
+        app:popUpTo="@id/navigation_home"
+        app:popUpToInclusive="true"
+        app:launchSingleTop="true"/>
     </fragment>
 
     <fragment
@@ -44,6 +50,63 @@
         android:id="@id/navigation_exercise"
         android:name="com.example.fitcoach.ui.Exercise.ExerciseFragment"
         android:label="@string/title_exercise"
-        tools:layout="@layout/fragment_exercise" />
+        tools:layout="@layout/fragment_exercise">
+    <action
+        android:id="@+id/exercise_to_choose"
+        app:destination="@id/choose_exercise"
+        app:popUpTo="@id/navigation_exercise"
+        app:popUpToInclusive="true"
+        app:launchSingleTop="true"/>
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/choose_exercise"
+        android:name="com.example.fitcoach.ui.Exercise.ChooseExerciseFragment"
+        android:label="Choose"
+        tools:layout="@layout/fragment_choose_exercise" >
+        <action
+            android:id="@+id/choose_to_exercise"
+            app:destination="@id/navigation_exercise"
+            app:popUpTo="@id/choose_exercise"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+        <action
+            android:id="@+id/choose_to_inexercise"
+            app:destination="@id/in_exercise"
+            app:popUpTo="@id/choose_exercise"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/in_exercise"
+        android:name="com.example.fitcoach.ui.Exercise.InExerciseFragment"
+        android:label="Choose"
+        tools:layout="@layout/fragment_in_exercise" >
+        <action
+            android:id="@+id/inexercise_to_execise"
+            app:destination="@id/navigation_exercise"
+            app:popUpTo="@id/in_exercise"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+    </fragment>
+    <fragment
+        android:id="@+id/infos"
+        android:name="com.example.fitcoach.ui.login.loginFragment"
+        android:label="Choose"
+        tools:layout="@layout/fragment_infos" >
+        <action
+            android:id="@+id/infos_to_home"
+            app:destination="@id/navigation_home"
+            app:popUpTo="@id/infos"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+    </fragment>
+
+
+    <action
+        android:id="@+id/action_global_to_infos"
+        app:destination="@id/infos" />
 
 </navigation>

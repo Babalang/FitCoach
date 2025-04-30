@@ -4,34 +4,39 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.fitcoach.databinding.FragmentHistoryBinding;
+import com.example.fitcoach.R;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class HistoryFragment extends Fragment {
 
-    private FragmentHistoryBinding binding;
-
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        HistoryViewModel historyViewModel =
-                new ViewModelProvider(this).get(HistoryViewModel.class);
-
-        binding = FragmentHistoryBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-
-        final TextView textView = binding.textHistory;
-        historyViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-        return root;
-    }
+    private RecyclerView recyclerView;
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_history, container, false);
+
+        recyclerView = root.findViewById(R.id.history_recycler);
+
+        List<Exercise> mockData = Arrays.asList(
+                new Exercise("28 avril 2025", "Course", 32, 3487),
+                new Exercise("27 avril 2025", "Marche", 45, 5100),
+                new Exercise("27 avril 2025", "Cyclisme", 60, 0)
+        );
+
+        HistoryAdapter adapter = new HistoryAdapter(mockData, exercise ->
+                Toast.makeText(getContext(), "Exercice: " + exercise.getSport(), Toast.LENGTH_SHORT).show()
+        );
+
+        recyclerView.setAdapter(adapter);
+
+        return root;
     }
 }

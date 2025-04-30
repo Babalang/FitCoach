@@ -1,5 +1,8 @@
 package com.example.fitcoach.Services;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
@@ -10,10 +13,13 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
+import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.fitcoach.Datas.AppDataManager;
@@ -51,14 +57,37 @@ public class StepCounterService extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "step_counter_channel",
+                    "Suivi des pas",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+
+            Notification notification = new Notification.Builder(this, "step_counter_channel")
+                    .setContentTitle("FitCoach")
+                    .setContentText("Le suivi des pas est actif")
+                    .setSmallIcon(R.drawable.appli_icon) // Remplace par ton icône custom si dispo
+                    .build();
+
+            startForeground(1, notification); // OBLIGATOIRE sur Android 10+
+        }
+
         if (stepCounterSensor == null) {
+            Toast.makeText(this, "Pas de capteur de pas détecté", Toast.LENGTH_SHORT).show();
             Log.e("StepCounterService", "Sensor not available");
             return START_NOT_STICKY;
         }
+
         sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-        return START_NOT_STICKY;
+        return START_STICKY; // Maintient le service actif
     }
+
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -71,11 +100,11 @@ public class StepCounterService extends Service implements SensorEventListener {
 
             int baseSteps = sharedPreferences.getInt(BASE_STEP_KEY, -1);
 
-            // Reset journalier si nécessaire
             if (!today.equals(lastResetDate) || baseSteps == -1) {
-                editor.putInt(BASE_STEP_KEY, totalSteps);
-                editor.putString(LAST_RESET_DATE_KEY, today);
                 baseSteps = totalSteps;
+                editor.putInt(BASE_STEP_KEY, baseSteps);
+                editor.putString(LAST_RESET_DATE_KEY, today);
+                editor.apply(); // <- très important ici
             }
 
             currentSteps = totalSteps - baseSteps;

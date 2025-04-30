@@ -6,4 +6,12 @@
     <string name="title_exercise">Exercice</string>
     <string name="title_music">Musique</string>
 
+    <string-array name="sports_array">
+        <item>Marche</item>
+        <item>Course</item>
+        <item>Vélo</item>
+        <item>Natation</item>
+    </string-array>
+
+
 </resources>

@@ -6,6 +6,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,6 +16,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startStepCounterService() {
         Intent serviceIntent = new Intent(MainActivity.this, StepCounterService.class);
-        startService(serviceIntent);
+        ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
         isServiceStarted = true;
     }
 
@@ -75,4 +78,21 @@ public class MainActivity extends AppCompatActivity {
     public boolean isServiceStarted() {
         return isServiceStarted;
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.app_bar_menu, menu); // Tu peux y ajouter le bouton "Paramètres"
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.action_global_to_infos);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }
