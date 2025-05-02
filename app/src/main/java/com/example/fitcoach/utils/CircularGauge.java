@@ -43,7 +43,7 @@ public class CircularGauge extends View {
     private void init() {
         paint.setColor(ContextCompat.getColor(getContext(), R.color.stepGauge));
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(40f);
+        paint.setStrokeWidth(100f);
         paint.setStrokeCap(Paint.Cap.ROUND);
 
         plein.setColor(ContextCompat.getColor(getContext(), R.color.gray));
@@ -52,7 +52,7 @@ public class CircularGauge extends View {
         plein.setStrokeCap(Paint.Cap.ROUND);
 
         textPaint.setColor(ContextCompat.getColor(getContext(), R.color.black));
-        textPaint.setTextSize(40f);
+        textPaint.setTextSize(60f);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setTypeface(Typeface.DEFAULT_BOLD);
     }

@@ -33,11 +33,6 @@ public class StepCounterService extends Service implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor stepCounterSensor;
     private int currentSteps = 0;
-    private SharedPreferences sharedPreferences;
-    private static final String STEP_PREFS = "step_counter_prefs";
-    private static final String CURRENT_STEPS_KEY = "current_steps";
-    private static final String BASE_STEP_KEY = "base_step_count";
-    private static final String LAST_RESET_DATE_KEY = "last_reset_date";
     private AppDataManager appDataManager;
 
 
@@ -46,13 +41,12 @@ public class StepCounterService extends Service implements SensorEventListener {
         super.onCreate();
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        sharedPreferences = getSharedPreferences(STEP_PREFS, Context.MODE_PRIVATE);
         Log.d("StepCounterService", "onCreate: service created");
         // Initialiser AppDataManager
         appDataManager = AppDataManager.getInstance(getApplicationContext());
 
         // Récupérer les données existantes depuis AppDataManager
-        currentSteps = appDataManager.getSteps();
+        currentSteps = appDataManager.getSteps(0);
     }
 
     @Override
@@ -94,31 +88,23 @@ public class StepCounterService extends Service implements SensorEventListener {
         if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
             int totalSteps = (int) event.values[0];
 
-            SharedPreferences.Editor editor = sharedPreferences.edit();
             String today = getTodayDate();
-            String lastResetDate = sharedPreferences.getString(LAST_RESET_DATE_KEY, "");
+            String lastResetDate = appDataManager.getLastResetDate(0);
 
-            int baseSteps = sharedPreferences.getInt(BASE_STEP_KEY, -1);
+            int baseSteps = appDataManager.getBaseSteps(0);
+
 
             if (!today.equals(lastResetDate) || baseSteps == -1) {
                 baseSteps = totalSteps;
-                editor.putInt(BASE_STEP_KEY, baseSteps);
-                editor.putString(LAST_RESET_DATE_KEY, today);
-                editor.apply(); // <- très important ici
+                Toast.makeText(this, "Reset effectué", Toast.LENGTH_SHORT).show();
+                appDataManager.updateStepCounter(0, today, 0,baseSteps);
             }
 
             currentSteps = totalSteps - baseSteps;
-            appDataManager.saveSteps(currentSteps);
+            appDataManager.updateStepCounter(0, today, currentSteps, baseSteps);
 
             sendStepCountUpdate();
         }
-    }
-
-
-    private void saveStepCount() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(CURRENT_STEPS_KEY, currentSteps);
-        editor.apply();
     }
 
     @Override
@@ -138,10 +124,6 @@ public class StepCounterService extends Service implements SensorEventListener {
     }
 
     private void sendStepCountUpdate() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(CURRENT_STEPS_KEY, currentSteps);
-        editor.apply();
-
         Intent intent = new Intent(ACTION_STEP_COUNT_UPDATE);
         intent.putExtra(EXTRA_STEP_COUNT, currentSteps);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);

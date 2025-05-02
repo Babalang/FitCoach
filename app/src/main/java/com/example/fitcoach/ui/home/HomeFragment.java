@@ -48,8 +48,8 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        AppDataManager appDataManager = AppDataManager.getInstance(requireContext());
-        int currentSteps = appDataManager.getSteps();  // Obtenir les pas depuis AppDataManager
+        AppDataManager appDataManager = AppDataManager.getInstance();
+        int currentSteps = appDataManager.getSteps(0);  // Obtenir les pas depuis AppDataManager
         homeViewModel.setStepCount(currentSteps); // Initialiser le ViewModel avec les données sauvegardées
 
         // Observe ViewModel
@@ -95,10 +95,6 @@ public class HomeFragment extends Fragment {
 
                 // Update ViewModel
                 homeViewModel.setStepCount(stepCount);
-
-                // Save to SharedPreferences
-                AppDataManager appDataManager = AppDataManager.getInstance(requireContext());
-                appDataManager.saveSteps(stepCount);
             }
         }
     }

@@ -22,17 +22,29 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.fitcoach.Services.StepCounterService;
 import com.example.fitcoach.databinding.ActivityMainBinding;
+import com.example.fitcoach.ui.login.loginActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.fitcoach.Datas.AppDataManager;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private static final int ACTIVITY_RECOGNITION_REQUEST_CODE = 100;
     private boolean isServiceStarted = false;
+    private static AppDataManager appDataManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        appDataManager = AppDataManager.getInstance(this);
+        Log.d("MainActivity", String.valueOf((!appDataManager.isCompleted(appDataManager.getCompteId()))));
+        if (appDataManager != null && !appDataManager.isCompleted(appDataManager.getCompteId())) {
+            Intent intent = new Intent(this, loginActivity.class);
+            startActivity(intent);
+            finish(); // Pour éviter le retour en arrière sur MainActivity
+            return;
+        }
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());

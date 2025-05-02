@@ -48,9 +48,9 @@ public class InExerciseFragment extends Fragment {
             NavHostFragment.findNavController(this)
                     .navigate(R.id.inexercise_to_execise);
         });
-        appDataManager= AppDataManager.getInstance(requireContext());
+        appDataManager= AppDataManager.getInstance();
         TextView textPas = view.findViewById(R.id.steps_value);
-        textPas.setText(String.valueOf(appDataManager.getSteps()));
+        textPas.setText(String.valueOf(appDataManager.getSteps(0)));
         Button pause = view.findViewById(R.id.pause_button);
         pause.setOnClickListener(v -> {
             if(!timer.isRunning()){
