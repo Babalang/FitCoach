@@ -7,10 +7,16 @@
     <string name="title_music">Musique</string>
 
     <string-array name="sports_array">
-        <item>Marche</item>
         <item>Course</item>
+        <item>Marche</item>
         <item>Vélo</item>
-        <item>Natation</item>
+        <item>Custom</item>
+    </string-array>
+
+    <string-array name="sportsTimer_array">
+        <item>Musculation</item>
+        <item>Course fractionnée</item>
+        <item>Custom</item>
     </string-array>
 
 

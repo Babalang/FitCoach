@@ -20,7 +20,6 @@
             android:focusable="true"
             android:focusableInTouchMode="true"/>
 
-        <!-- 🔘 3 boutons en overlay (au bas de l'écran) -->
         <LinearLayout
             android:id="@+id/button_layout"
             android:layout_width="match_parent"

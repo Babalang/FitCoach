@@ -2,12 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature
         android:name="android.hardware.sensor.stepcounter"
         android:required="true"/>
@@ -22,7 +24,8 @@
         android:theme="@style/Theme.FitCoach"
         tools:targetApi="31"
         android:background="@color/colorBackground"
-        android:screenOrientation="portrait">
+        android:screenOrientation="portrait"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".MainActivity"
@@ -45,6 +48,20 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="health" />
+        <service android:name=".Services.LocationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+        <service
+            android:name=".Services.ExerciseService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location|health">
+        <intent-filter>
+                <action android:name="com.fitcoach.START"/>
+            </intent-filter>
+        </service>
+
         <receiver android:name=".widget.StepWidgetProvider" android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -53,6 +70,7 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info" />
         </receiver>
+
     </application>
 
 </manifest>

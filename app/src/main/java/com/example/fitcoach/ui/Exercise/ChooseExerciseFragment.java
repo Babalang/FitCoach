@@ -1,88 +1,167 @@
 package com.example.fitcoach.ui.Exercise;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.Navigation;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.fitcoach.R;
-import com.google.android.gms.location.LocationServices;
-
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Marker;
+import com.example.fitcoach.Services.ExerciseService;
 
 public class ChooseExerciseFragment extends Fragment {
-    private MapView map;
 
-    private long coords[];
+    private Spinner sportSpinner;
+    private ImageView sportImage;
+    private Button startButton;
+
+    private String[] sports;
+    private String[] sportsTimer;
+    private int[] sportImages = {
+            R.drawable.appli_icon,         // Assure-toi d’avoir ces ressources
+            R.drawable.walking,
+            R.drawable.bike,
+            R.drawable.appli_icon
+    };
+    private int[] sportImagesTimer = {
+            R.drawable.musculation,
+            R.drawable.appli_icon,
+            R.drawable.appli_icon
+    };
+    private List<ExerciseStep> timerSteps = new ArrayList<>();
+    private RecyclerView stepsRecycler;
+    private Button addStepButton;
+    private ExerciseStepAdapter adapter;
+
+
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        super.onCreateView(inflater, container, savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_choose_exercise, container, false);
-        setHasOptionsMenu(true);
-        map = view.findViewById(R.id.map);
-        map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setMultiTouchControls(true);
-        // Point par défaut
-        GeoPoint startPoint = new GeoPoint(48.8566, 2.3522); // Paris
-        map.getController().setZoom(15.0);
-        map.getController().setCenter(startPoint);
-        map.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                GeoPoint point = (GeoPoint) map.getProjection().fromPixels((int) event.getX(), (int) event.getY());
 
-                Marker marker = new Marker(map);
-                marker.setPosition(point);
-                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                marker.setTitle("Destination choisie");
-                map.getOverlays().clear();
-                map.getOverlays().add(marker);
-                map.invalidate();
+        // Initialisation
+        sportSpinner = view.findViewById(R.id.sport_spinner);
+        sportImage = view.findViewById(R.id.sport_image);
+        startButton = view.findViewById(R.id.start_exercise_button);
+        sportImage.setVisibility(View.INVISIBLE);
+        sportSpinner.setVisibility(View.INVISIBLE);
+        startButton.setVisibility(View.INVISIBLE);
+        RadioGroup group = view.findViewById(R.id.exercise_type_group);
+        stepsRecycler = view.findViewById(R.id.timer_steps_recycler);
+        addStepButton = view.findViewById(R.id.add_step_button);
+        adapter = new ExerciseStepAdapter(timerSteps);
+        stepsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        stepsRecycler.setAdapter(adapter);
 
-                coords = new long[2];
-                coords[0] = (long) point.getLatitudeE6();
-                coords[1] = (long) point.getLongitudeE6();
+        group.setOnCheckedChangeListener((radioGroup, checkedId) -> {
+            if (checkedId == R.id.gps_radio) {
+                stepsRecycler.setVisibility(View.GONE);
+                addStepButton.setVisibility(View.GONE);
+                sportImage.setVisibility(View.VISIBLE);
+                sportSpinner.setVisibility(View.VISIBLE);
+                startButton.setVisibility(View.VISIBLE);
+                sports = getResources().getStringArray(R.array.sports_array);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                        android.R.layout.simple_spinner_item, sports);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                sportSpinner.setAdapter(adapter);
+
+                // Image change en fonction du choix
+                sportSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if (position < sportImages.length) {
+                            sportImage.setImageResource(sportImages[position]);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {}
+                });
+            } else if (checkedId == R.id.timer_radio) {
+                stepsRecycler.setVisibility(View.VISIBLE);
+                addStepButton.setVisibility(View.VISIBLE);
+
+                addStepButton.setOnClickListener(v -> {
+                    timerSteps.add(new ExerciseStep("Nouvelle étape", 30));
+                    adapter.notifyItemInserted(timerSteps.size() - 1);
+                });
+
+                sportImage.setVisibility(View.VISIBLE);
+                sportSpinner.setVisibility(View.VISIBLE);
+                startButton.setVisibility(View.VISIBLE);
+                sportsTimer = getResources().getStringArray(R.array.sportsTimer_array);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                        android.R.layout.simple_spinner_item, sportsTimer);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                sportSpinner.setAdapter(adapter);
+
+                // Image change en fonction du choix
+                sportSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if (position < sportImagesTimer.length) {
+                            sportImage.setImageResource(sportImagesTimer[position]);
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {}
+                });
+
             }
-            return false;
         });
-        Spinner spinner = view.findViewById(R.id.sport_spinner);
-        Button btn1 = view.findViewById(R.id.start_exercise_button);
-        btn1.setOnClickListener(v -> {
-            // Créer un Bundle pour passer les coordonnées au fragment suivant
-            Bundle bundle = new Bundle();
-            bundle.putLongArray("coords", coords);  // Passer les coordonnées comme long[]
-            String sport = spinner.getSelectedItem().toString();
-            bundle.putString("sport", sport);  // Passer le sport comme String
 
-            // Naviguer vers le fragment suivant avec les coordonnées
-            NavController navController = NavHostFragment.findNavController(ChooseExerciseFragment.this);
-            navController.navigate(R.id.choose_to_inexercise, bundle);
+        // Bouton démarrer
+        startButton.setOnClickListener(v -> {
+            String selectedSport = (String) sportSpinner.getSelectedItem();
+            int checkedId = group.getCheckedRadioButtonId();
+            boolean isChrono = (checkedId == R.id.gps_radio);
+            String exerciseType = isChrono ? "chrono" : "timer";
+
+            ArrayList<ExerciseStep> stepsToSend = isChrono ? new ArrayList<>() : new ArrayList<>(timerSteps);
+
+            Bundle bundle = new Bundle();
+            bundle.putString("selected_sport", selectedSport);
+            bundle.putString("exercise_type", exerciseType);
+            bundle.putSerializable("timer_steps", stepsToSend);
+            Log.d("ChooseExerciseFragment", "ExerciseService started, isChrono: " + isChrono + ", stepsToSend: " + stepsToSend.size() + ", selectedSport: " + selectedSport + ", exerciseType: " + exerciseType);
+
+            Navigation.findNavController(v).navigate(R.id.choose_to_inexercise, bundle);
         });
+
         return view;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            // Action de retour personnalisée (ou juste revenir)
-            NavHostFragment.findNavController(this)
-                    .navigate(R.id.choose_to_exercise);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    private void startExerciseService(String sportType, boolean isChrono, ArrayList<ExerciseStep> steps) {
+        Intent intent = new Intent(requireContext(), ExerciseService.class);
+        intent.putExtra("sport_type", sportType);
+        intent.putExtra("is_chrono", isChrono);
+        requireContext().startService(intent);
     }
+
 
 }

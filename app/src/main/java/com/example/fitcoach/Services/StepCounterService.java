@@ -1,5 +1,6 @@
 package com.example.fitcoach.Services;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,7 +9,6 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -19,12 +19,13 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.R;
 import com.example.fitcoach.widget.StepWidgetProvider;
+
+import java.text.DecimalFormat;
 
 public class StepCounterService extends Service implements SensorEventListener {
 
@@ -34,6 +35,8 @@ public class StepCounterService extends Service implements SensorEventListener {
     private Sensor stepCounterSensor;
     private int currentSteps = 0;
     private AppDataManager appDataManager;
+    private static final float METRIC_WALKING_FACTOR = 0.708f;
+    private DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
 
     @Override
@@ -97,11 +100,14 @@ public class StepCounterService extends Service implements SensorEventListener {
             if (!today.equals(lastResetDate) || baseSteps == -1) {
                 baseSteps = totalSteps;
                 Toast.makeText(this, "Reset effectué", Toast.LENGTH_SHORT).show();
-                appDataManager.updateStepCounter(0, today, 0,baseSteps);
+                appDataManager.updateStepCounter(0, today, 0,baseSteps,0f, 0f);
             }
-
             currentSteps = totalSteps - baseSteps;
-            appDataManager.updateStepCounter(0, today, currentSteps, baseSteps);
+            AppDataManager.Compte compte = appDataManager.getCompteById(appDataManager.getCompteId());
+            float stepLength = estimateStepLength(compte.getTaille(), false);
+            float DISTANCE = (currentSteps * stepLength) / 100000f; // en km
+            float CALORIES = compte.getPoids() * DISTANCE * METRIC_WALKING_FACTOR;
+            appDataManager.updateStepCounter(0, today, currentSteps, baseSteps, CALORIES, DISTANCE);
 
             sendStepCountUpdate();
         }
@@ -126,6 +132,8 @@ public class StepCounterService extends Service implements SensorEventListener {
     private void sendStepCountUpdate() {
         Intent intent = new Intent(ACTION_STEP_COUNT_UPDATE);
         intent.putExtra(EXTRA_STEP_COUNT, currentSteps);
+        intent.putExtra("calories", appDataManager.getCalories(0));
+        intent.putExtra("distance", appDataManager.getDistance(0));
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         Log.d("StepCounterService", "sendStepCountUpdate: step count updated");
 
@@ -139,7 +147,10 @@ public class StepCounterService extends Service implements SensorEventListener {
 
         RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_step);
         views.setTextViewText(R.id.steps_text, currentSteps+" pas");
-        views.setProgressBar(R.id.step_progress_bar, 10000, currentSteps, false);
+        views.setProgressBar(R.id.step_progress_bar, appDataManager.getStepsObjective(appDataManager.getCompteId()), currentSteps, false);
+
+        views.setTextViewText(R.id.distance_text, decimalFormat.format(appDataManager.getDistance(0))+" km");
+        views.setTextViewText(R.id.calories_text, decimalFormat.format(appDataManager.getCalories(0))+" kcal");
 
         appWidgetManager.updateAppWidget(componentName, views);
     }
@@ -148,6 +159,11 @@ public class StepCounterService extends Service implements SensorEventListener {
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
         return sdf.format(new java.util.Date());
     }
+
+    public float estimateStepLength(float height, boolean isRunning) {
+        return isRunning ? height * 0.65f : height * 0.415f;
+    }
+
 
 
 }

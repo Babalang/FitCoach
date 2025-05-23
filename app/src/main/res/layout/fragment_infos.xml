@@ -94,18 +94,45 @@
                     android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Sexe -->
+            <!-- Taille -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Sexe"
+                android:hint="Taille (cm)"
                 android:layout_marginTop="12dp">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/input_gender"
+                    android:id="@+id/input_size"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Sexe -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sexe"
+                android:textAppearance="?attr/textAppearanceSubtitle1"
+                android:layout_marginTop="12dp" />
+
+            <RadioGroup
+                android:id="@+id/radio_group_gender"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_male"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Homme" />
+
+                <RadioButton
+                    android:id="@+id/radio_female"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Femme" />
+            </RadioGroup>
 
             <!-- Objectifs -->
             <TextView

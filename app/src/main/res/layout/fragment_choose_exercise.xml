@@ -1,47 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="0dp">
+    android:padding="24dp">
 
-    <!-- Spinner -->
-    <Spinner
-        android:id="@+id/sport_spinner"
+    <!-- Titre -->
+    <TextView
+        android:id="@+id/exercise_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choisis ton exercice"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- RadioGroup type d'exercice -->
+    <RadioGroup
+        android:id="@+id/exercise_type_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/sports_array"
-        android:layout_marginBottom="16dp"
-        android:layout_marginTop="10dp"
-        android:paddingTop="15dp"/>
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/exercise_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Carte OSMDroid -->
+        <RadioButton
+            android:id="@+id/gps_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chronomètre" />
 
-    <!-- Bouton de validation -->
-    <org.osmdroid.views.MapView
-        android:id="@+id/map"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:paddingTop="30dp"
-        app:layout_constraintTop_toBottomOf="@id/sport_spinner"
-        tools:layout_editor_absoluteX="0dp" />
+        <RadioButton
+            android:id="@+id/timer_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Timer" />
+    </RadioGroup>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/start_exercise_button"
+    <!-- Spinner sport -->
+    <Spinner
+        android:id="@+id/sport_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Démarrer l'exercice"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:background="@drawable/rounded_button"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/exercise_type_group"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Image -->
+    <ImageView
+        android:id="@+id/sport_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="15dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/appli_icon"
+        app:layout_constraintTop_toBottomOf="@id/sport_spinner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- RecyclerView (Séquences timer) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/timer_steps_recycler"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/sport_image"
+        app:layout_constraintBottom_toTopOf="@id/add_step_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0" />
+
+    <!-- Bouton Ajouter -->
+    <Button
+        android:id="@+id/add_step_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ajouter une séquence"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/timer_steps_recycler"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Bouton démarrer -->
+    <Button
+        android:id="@+id/start_exercise_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Démarrer l'exercice"
+        android:textSize="16sp"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/add_step_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

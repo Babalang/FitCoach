@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -41,12 +42,19 @@ public class loginFragment extends Fragment {
         age.setText(String.valueOf(compte.getAge()));
         EditText weight = view.findViewById(R.id.input_weight);
         weight.setText(String.valueOf(compte.getPoids()));
-        EditText gender = view.findViewById(R.id.input_gender);
-        gender.setText(compte.getSexe());
+        RadioGroup gender = view.findViewById(R.id.radio_group_gender);
+        if (compte.getSexe().equals("Homme")) {
+            gender.check(R.id.radio_male);
+        } else {
+            gender.check(R.id.radio_female);
+        }
         EditText stepGoal = view.findViewById(R.id.input_step_goal);
         stepGoal.setText(String.valueOf(compte.getStepsObjective()));
         EditText calorieGoal = view.findViewById(R.id.input_calorie_goal);
         calorieGoal.setText(String.valueOf(compte.getCaloriesObjective()));
+        EditText size = view.findViewById(R.id.input_size);
+        size.setText(String.valueOf(compte.getTaille()));
+        int selectedId = gender.getCheckedRadioButtonId();
         Button btn1 = view.findViewById(R.id.save_button);
         btn1.setOnClickListener(v -> {
             if(!login.getText().toString().isEmpty()
@@ -54,10 +62,17 @@ public class loginFragment extends Fragment {
             && !phone.getText().toString().isEmpty()
             && !age.getText().toString().isEmpty()
             && !weight.getText().toString().isEmpty()
-            && !gender.getText().toString().isEmpty()
             && !stepGoal.getText().toString().isEmpty()
-            && !calorieGoal.getText().toString().isEmpty()){
-                appDataManager.updateCompte(id,login.getText().toString(), email.getText().toString(), phone.getText().toString(), Integer.parseInt(age.getText().toString()), gender.getText().toString(), Integer.parseInt(stepGoal.getText().toString()), Integer.parseInt(calorieGoal.getText().toString()));
+            && !calorieGoal.getText().toString().isEmpty()
+           && !size.getText().toString().isEmpty() ){
+                int selectedId1 = gender.getCheckedRadioButtonId();
+                String sexe = "";
+                if (selectedId1 == R.id.radio_male) {
+                    sexe = "Homme";
+                } else if (selectedId1 == R.id.radio_female) {
+                    sexe = "Femme";
+                }
+                appDataManager.updateCompte(id,login.getText().toString(), email.getText().toString(), phone.getText().toString(), Integer.parseInt(age.getText().toString()), sexe, Integer.parseInt(stepGoal.getText().toString()), Integer.parseInt(calorieGoal.getText().toString()), Integer.parseInt(size.getText().toString()), Float.parseFloat(weight.getText().toString()));
                 // Naviguer vers le fragment suivant avec les coordonnées
                 NavController navController = NavHostFragment.findNavController(this);
                 navController.navigate(R.id.infos_to_home);

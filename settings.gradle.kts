@@ -16,9 +16,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("../repo")
+        }
     }
 }
 
 rootProject.name = "FitCoach"
 include(":app")
- 

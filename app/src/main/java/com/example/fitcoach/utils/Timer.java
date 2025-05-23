@@ -17,13 +17,23 @@ import androidx.core.content.ContextCompat;
 import com.example.fitcoach.R;
 
 public class Timer extends View {
-    private long elapsedTime = 0; // en secondes
+
+    public interface TimerListener {
+        void onTimerFinished();
+    }
+
     private boolean isRunning = false;
+    private boolean isCountdown = false;
+    private long totalTime = 0;      // En secondes pour le compte à rebours
+    private long elapsedTime = 0;    // En secondes pour le chrono ou timer restant
+
     private final Handler handler = new Handler();
     private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
+
+    private TimerListener listener;
 
     public Timer(Context context) {
         super(context);
@@ -56,9 +66,20 @@ public class Timer extends View {
         @Override
         public void run() {
             if (isRunning) {
-                elapsedTime++;
-                invalidate();
-                handler.postDelayed(this, 1000);
+                if (isCountdown) {
+                    if (elapsedTime > 0) {
+                        elapsedTime--;
+                        invalidate();
+                        handler.postDelayed(this, 1000);
+                    } else {
+                        stop();
+                        if (listener != null) listener.onTimerFinished();
+                    }
+                } else {
+                    elapsedTime++;
+                    invalidate();
+                    handler.postDelayed(this, 1000);
+                }
             }
         }
     };
@@ -77,7 +98,38 @@ public class Timer extends View {
 
     public void reset() {
         stop();
+        elapsedTime = isCountdown ? totalTime : 0;
+        invalidate();
+    }
+
+    public void setCountdown(long seconds) {
+        isCountdown = true;
+        totalTime = seconds;
+        elapsedTime = seconds;
+        invalidate();
+    }
+
+    public void setChronoMode() {
+        isCountdown = false;
         elapsedTime = 0;
+        invalidate();
+    }
+
+    public void setTimerListener(TimerListener listener) {
+        this.listener = listener;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public String getElapsedTime() {
+        long time = isCountdown ? elapsedTime : elapsedTime;
+        return String.format("%02d:%02d", time / 60, time % 60);
+    }
+
+    public void setElapsedTime(long elapsedTime) {
+        this.elapsedTime = elapsedTime;
         invalidate();
     }
 
@@ -93,42 +145,31 @@ public class Timer extends View {
 
         rect.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
 
-        // Dessiner le fond
+        // Fond gris
         canvas.drawArc(rect, 0, 360, false, backgroundPaint);
 
-        // Calculer l'angle de progression basé sur le temps écoulé
-        float sweepAngle = (360f * (elapsedTime % 60)) / 60;
+        // Progression
+        float sweepAngle;
+        if (isCountdown && totalTime > 0) {
+            sweepAngle = 360f * (1f - ((float) elapsedTime / totalTime));
+        } else {
+            sweepAngle = 360f * ((elapsedTime % 60f) / 60f);
+        }
 
-        // Dégradé avec des couleurs transparentes
+        // Dégradé
         SweepGradient sweepGradient = new SweepGradient(
                 centerX,
                 centerY,
-                new int[]{
-                        Color.parseColor("#80FF4081"),  // Couleur avec transparence en début
-                        Color.parseColor("#FF4081")     // Couleur opaque en fin
-                },
+                new int[]{Color.parseColor("#80FF4081"), Color.parseColor("#FF4081")},
                 null
         );
-
-        // Rotation pour aligner le dégradé avec l'arc
         Matrix gradientMatrix = new Matrix();
-        gradientMatrix.postRotate(-95, centerX, centerY); // Commencer à 12h
+        gradientMatrix.postRotate(-95, centerX, centerY);
         sweepGradient.setLocalMatrix(gradientMatrix);
-
         progressPaint.setShader(sweepGradient);
 
-        // Dessiner l'arc de progression avec le dégradé
+        // Dessin
         canvas.drawArc(rect, -90, sweepAngle, false, progressPaint);
-
-        // Dessiner le temps au centre
-        String timeText = String.format("%02d:%02d", elapsedTime / 60, elapsedTime % 60);
-        canvas.drawText(timeText, centerX, centerY + 20f, textPaint);
-    }
-    public boolean isRunning() {
-        return isRunning;
-    }
-
-    public String getElapsedTime() {
-        return String.format("%02d:%02d", elapsedTime / 60, elapsedTime % 60);
+        canvas.drawText(getElapsedTime(), centerX, centerY + 20f, textPaint);
     }
 }

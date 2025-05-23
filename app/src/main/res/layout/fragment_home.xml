@@ -46,11 +46,11 @@
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/exercise_info"
+                    android:id="@+id/distance_info"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="0 / 30 min"
+                    android:text="0 / 30 km"
                     android:textAlignment="center"
                     android:textSize="16sp" />
 

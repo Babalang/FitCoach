@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,10 +30,18 @@ public class loginActivity extends AppCompatActivity {
         EditText phone = findViewById(R.id.input_phone);
         EditText age = findViewById(R.id.input_age);
         EditText weight = findViewById(R.id.input_weight);
-        EditText gender = findViewById(R.id.input_gender);
+        RadioGroup genderGroup = findViewById(R.id.radio_group_gender);
+        int selectedId = genderGroup.getCheckedRadioButtonId();
+        String sexe = "";
+        if (selectedId == R.id.radio_male) {
+            sexe = "Homme";
+        } else {
+            sexe = "Femme";
+        }
         EditText stepGoal = findViewById(R.id.input_step_goal);
         EditText calorieGoal = findViewById(R.id.input_calorie_goal);
         Button btn1 = findViewById(R.id.save_button);
+        String finalSexe = sexe;
         btn1.setOnClickListener(v -> {
             try {
                 int ageVal = Integer.parseInt(age.getText().toString().trim());
@@ -44,9 +53,11 @@ public class loginActivity extends AppCompatActivity {
                         email.getText().toString().trim(),
                         phone.getText().toString().trim(),
                         ageVal,
-                        gender.getText().toString().trim(),
+                        finalSexe,
                         stepGoalVal,
-                        calorieGoalVal
+                        calorieGoalVal,
+                        0,
+                        Float.parseFloat(weight.getText().toString().trim())
                 );
 
                 Intent intent = new Intent(this, MainActivity.class);

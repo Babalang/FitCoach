@@ -11,7 +11,7 @@ import android.widget.Toast;
 public class AppDataManager {
     private static final String TAG = "AppDataManager";
     private static final String DATABASE_NAME = "fitcoach_data";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     private static final String TABLE_COMPTE = "comptes";
 
@@ -28,12 +28,15 @@ public class AppDataManager {
     private static final String COLUMN_DATE = "date";
     private static final String COLUMN_EXERCICE = "exercice";
     private static final String COLUMN_CALORIES = "calories";
+    private static final String COLUMN_DISTANCE = "distance";
     private static final String COLUMN_STEPS = "steps";
     private static final String COLUMN_BASE_STEPS = "base_steps";
     private static final String COLUMN_LAST_RESET_DATE = "last_reset_date";
     private static final String COLUMN_IS_COMPLETED = "is_completed";
     private static final String COLUMN_STEPS_OBJECTIVE = "steps_objective";
     private static final String COLUMN_CALORIES_OBJECTIVE = "calories_objective";
+    private static final String COLUMN_TAILLE = "taille";
+    private static final String COLUMN_POIDS = "poids";
 
     private static final String CREATE_TABLE_COMPTE =
             "CREATE TABLE " + TABLE_COMPTE + "("+
@@ -42,6 +45,8 @@ public class AppDataManager {
             COLUMN_EMAIL+" TEXT, " +
             COLUMN_TELEPHONE+" TEXT, " +
             COLUMN_AGE+" INTEGER, " +
+            COLUMN_POIDS+" FLOAT, " +
+            COLUMN_TAILLE+" INTEGER, " +
             COLUMN_SEXE+" TEXT, "+
             COLUMN_IS_COMPLETED+" BOOLEAN, " +
             COLUMN_STEPS_OBJECTIVE+" INTEGER, " +
@@ -54,14 +59,17 @@ public class AppDataManager {
             COLUMN_EXERCICE+" TEXT, " +
             COLUMN_CALORIES+" INTEGER, " +
             COLUMN_STEPS+" INTEGER, " +
-            COLUMN_BASE_STEPS+" INTEGER);";
+            COLUMN_BASE_STEPS+" INTEGER, " +
+            COLUMN_DISTANCE+" FLOAT);";
 
     private static final String CREATE_TABLE_STEPCOUNTER =
             "CREATE TABLE " + TABLE_STEPCOUNTER + "("+
             COLUMN_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_LAST_RESET_DATE+" TEXT, " +
             COLUMN_STEPS+" INTEGER," +
-            COLUMN_BASE_STEPS+" INTEGER);";
+            COLUMN_BASE_STEPS+" INTEGER,"+
+            COLUMN_CALORIES+" FLOAT,"+
+            COLUMN_DISTANCE+" FLOAT);";
 
     private static AppDataManager instance;
     private DataBaseHelper dHelper;
@@ -95,7 +103,7 @@ public class AppDataManager {
         if (cursor.moveToFirst()) {
             int count = cursor.getInt(0);
             if (count == 0) {
-                insertStepCounter("", 0,0); // Insère seulement si aucune ligne n'existe
+                insertStepCounter("", 0,0,0,0); // Insère seulement si aucune ligne n'existe
             }
         }
         cursor.close();
@@ -103,7 +111,7 @@ public class AppDataManager {
         if (cursor2.moveToFirst()) {
             int count = cursor2.getInt(0);
             if (count == 0) {
-                insertCompte("", "", "", 0, "", 0, 0, false);
+                insertCompte("", "", "", 0, "", 0, 0, false, 0, 0);
             }
         }
         cursor2.close();
@@ -130,7 +138,7 @@ public class AppDataManager {
         }
     }
 
-    public void insertCompte(String login, String email, String telephone, int age, String sexe, int stepsObjective, int caloriesObjective, boolean isCompleted){
+    public void insertCompte(String login, String email, String telephone, int age, String sexe, int stepsObjective, int caloriesObjective, boolean isCompleted, int taille, float poids){
         ContentValues values = new ContentValues();
         values.put(COLUMN_LOGIN, login);
         values.put(COLUMN_EMAIL, email);
@@ -140,29 +148,34 @@ public class AppDataManager {
         values.put(COLUMN_IS_COMPLETED, isCompleted);
         values.put(COLUMN_STEPS_OBJECTIVE, stepsObjective);
         values.put(COLUMN_CALORIES_OBJECTIVE, caloriesObjective);
+        values.put(COLUMN_TAILLE, taille);
+        values.put(COLUMN_POIDS, poids);
         db.insert(TABLE_COMPTE, null, values);
     }
 
-    public void insertHistorique(String date, String exercice, int calories, int steps){
+    public void insertHistorique(String date, String exercice, int calories, int steps, float distance){
         ContentValues values = new ContentValues();
         values.put(COLUMN_DATE, date);
         values.put(COLUMN_EXERCICE, exercice);
         values.put(COLUMN_CALORIES, calories);
         values.put(COLUMN_STEPS, steps);
+        values.put(COLUMN_DISTANCE, distance);
         db.insert(TABLE_HISTORIQUE, null, values);
     }
 
-    public void insertStepCounter(String date, int steps, int baseSteps) {
+    public void insertStepCounter(String date, int steps, int baseSteps, float calories, float distance) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, 0); // Ajoute ceci !
         values.put(COLUMN_LAST_RESET_DATE, date);
         values.put(COLUMN_STEPS, steps);
         values.put(COLUMN_BASE_STEPS, baseSteps);
+        values.put(COLUMN_CALORIES, calories);
+        values.put(COLUMN_DISTANCE, distance);
         db.insert(TABLE_STEPCOUNTER, null, values);
     }
 
 
-    public void updateCompte(int id, String login, String email, String telephone, int age, String sexe, int stepsObjective, int caloriesObjective){
+    public void updateCompte(int id, String login, String email, String telephone, int age, String sexe, int stepsObjective, int caloriesObjective,int size, float poids){
         ContentValues values = new ContentValues();
         values.put(COLUMN_LOGIN, login);
         values.put(COLUMN_EMAIL, email);
@@ -172,6 +185,8 @@ public class AppDataManager {
         values.put(COLUMN_IS_COMPLETED, true);
         values.put(COLUMN_STEPS_OBJECTIVE, stepsObjective);
         values.put(COLUMN_CALORIES_OBJECTIVE, caloriesObjective);
+        values.put(COLUMN_TAILLE, size);
+        values.put(COLUMN_POIDS, poids);
 
         Log.d(TAG, "Tentative mise à jour ID: " + id);
 
@@ -180,19 +195,22 @@ public class AppDataManager {
     }
 
 
-    public void updateHistorique(int id, String date, String exercice, int calories, int steps){
+    public void updateHistorique(int id, String date, String exercice, float calories, int steps, float distance){
         ContentValues values = new ContentValues();
         values.put(COLUMN_DATE, date);
         values.put(COLUMN_EXERCICE, exercice);
         values.put(COLUMN_CALORIES, calories);
         values.put(COLUMN_STEPS, steps);
+        values.put(COLUMN_DISTANCE, distance);
         db.update(TABLE_HISTORIQUE, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
     }
-    public void updateStepCounter(int id, String date, int steps, int baseSteps) {
+    public void updateStepCounter(int id, String date, int steps, int baseSteps, float calories, float distance) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_STEPS, steps);
         values.put(COLUMN_BASE_STEPS, baseSteps);
         values.put(COLUMN_LAST_RESET_DATE, date);
+        values.put(COLUMN_CALORIES, calories);
+        values.put(COLUMN_DISTANCE, distance);
         db.update(TABLE_STEPCOUNTER, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
     }
 
@@ -218,6 +236,17 @@ public class AppDataManager {
         return steps;
     }
 
+    public float getCalories(int id) {
+        String query = "SELECT " + COLUMN_CALORIES + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
+        float calories = 0;
+        if (cursor.moveToFirst()) {
+            calories = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_CALORIES));
+        }
+        cursor.close();
+        return calories;
+    }
+
     public String getLastResetDate(int id) {
         String query = "SELECT " + COLUMN_LAST_RESET_DATE + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
@@ -238,6 +267,17 @@ public class AppDataManager {
         }
         cursor.close();
         return baseSteps;
+    }
+
+    public float getDistance(int id) {
+        String query = "SELECT " + COLUMN_DISTANCE + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
+        float distance = 0;
+        if (cursor.moveToFirst()) {
+            distance = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_DISTANCE));
+        }
+        cursor.close();
+        return distance;
     }
 
     public boolean isCompleted(int id) {
@@ -338,8 +378,8 @@ public class AppDataManager {
             int emailIndex = cursor.getColumnIndexOrThrow(COLUMN_EMAIL);
             int telephoneIndex = cursor.getColumnIndexOrThrow(COLUMN_TELEPHONE);
             int ageIndex = cursor.getColumnIndexOrThrow(COLUMN_AGE);
-            int poidsIndex = cursor.getColumnIndexOrThrow(COLUMN_AGE);
-            int tailleIndex = cursor.getColumnIndexOrThrow(COLUMN_AGE);
+            int poidsIndex = cursor.getColumnIndexOrThrow(COLUMN_POIDS);
+            int tailleIndex = cursor.getColumnIndexOrThrow(COLUMN_TAILLE);
             int sexeIndex = cursor.getColumnIndexOrThrow(COLUMN_SEXE);
             int isCompletedIndex = cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED);
             int stepsObjectiveIndex = cursor.getColumnIndexOrThrow(COLUMN_STEPS_OBJECTIVE);

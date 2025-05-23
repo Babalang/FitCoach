@@ -1,6 +1,6 @@
 package com.example.fitcoach.ui.home;
 
-import android.content.BroadcastReceiver;
+import  android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import com.example.fitcoach.Services.StepCounterService;
 import com.example.fitcoach.databinding.FragmentHomeBinding;
 import com.example.fitcoach.ui.history.HistoryFragment;
 import androidx.navigation.fragment.NavHostFragment;
+import java.text.DecimalFormat;
 
 
 public class HomeFragment extends Fragment {
@@ -35,6 +37,7 @@ public class HomeFragment extends Fragment {
     private LocalBroadcastManager localBroadcastManager;
     private HomeViewModel homeViewModel;
     private static final String TAG = "HomeFragment";
+    private DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -49,6 +52,19 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         AppDataManager appDataManager = AppDataManager.getInstance();
+        TextView distance = binding.distanceInfo;
+        TextView caloriesInfo = binding.caloriesInfo;
+        homeViewModel.getDistance().observe(getViewLifecycleOwner(), dist -> {
+            if (binding != null) {
+                distance.setText(decimalFormat.format(dist)+" km");
+            }
+        });
+        homeViewModel.getCalories().observe(getViewLifecycleOwner(), cal -> {
+            if (binding != null) {
+                caloriesInfo.setText(decimalFormat.format(cal) + " / "+appDataManager.getCaloriesObjective(appDataManager.getCompteId())+" kcal");
+            }
+        });
+
         int currentSteps = appDataManager.getSteps(0);  // Obtenir les pas depuis AppDataManager
         homeViewModel.setStepCount(currentSteps); // Initialiser le ViewModel avec les données sauvegardées
 
@@ -56,8 +72,8 @@ public class HomeFragment extends Fragment {
         homeViewModel.getStepCount().observe(getViewLifecycleOwner(), stepCount -> {
             if (binding != null) {
                 binding.circularGauge.setValue(stepCount);
-                binding.circularGauge.setTotal(10000);
-                binding.stepsInfo.setText(stepCount + " / 10000 pas");
+                binding.circularGauge.setTotal(appDataManager.getStepsObjective(appDataManager.getCompteId()));
+                binding.stepsInfo.setText(stepCount + " / "+appDataManager.getStepsObjective(appDataManager.getCompteId())+" pas");
             }
         });
 
@@ -92,8 +108,10 @@ public class HomeFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             if (StepCounterService.ACTION_STEP_COUNT_UPDATE.equals(intent.getAction())) {
                 int stepCount = intent.getIntExtra(StepCounterService.EXTRA_STEP_COUNT, 0);
-
-                // Update ViewModel
+                float calories = intent.getFloatExtra("calories", 0f);
+                float distance = intent.getFloatExtra("distance", 0f);
+                homeViewModel.setCalories(calories);
+                homeViewModel.setDistance(distance);
                 homeViewModel.setStepCount(stepCount);
             }
         }

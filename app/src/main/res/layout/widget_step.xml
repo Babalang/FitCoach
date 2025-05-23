@@ -1,32 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:padding="12dp">
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="8dp">
 
-    <TextView
-        android:id="@+id/steps_text"
+    <!-- Left: Steps and Progress Bar -->
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0 pas"
-        android:textSize="24sp"
-        android:textColor="@color/black"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="10dp"
-        android:layout_alignParentTop="true"/>
+        android:gravity="center"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
-    <ProgressBar
-        android:id="@+id/step_progress_bar"
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/steps_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/black"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/steps_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Steps"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/step_progress_bar"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="8dp"
+            android:max="10000"
+            android:progress="0"
+            android:progressDrawable="@drawable/circular_progress_bar"
+            android:background="@drawable/circular_progress_background" />
+    </LinearLayout>
+
+    <!-- Right: Distance and Calories -->
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/steps_text"
-        android:layout_centerHorizontal="true"
-        android:max="100"
-        android:progress="0"
-        android:backgroundTint="@color/colorPrimary"
-        android:progressTint="@color/logo_color"
-        android:layout_marginTop="8dp" />
-</RelativeLayout>
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/distance_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.00 km"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/distance_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/calories_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="0 kcal"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/calories_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Calories"
+            android:textColor="@color/black"
+            android:textSize="12sp" />
+    </LinearLayout>
+</LinearLayout>

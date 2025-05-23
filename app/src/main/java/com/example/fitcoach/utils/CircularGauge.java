@@ -48,7 +48,7 @@ public class CircularGauge extends View {
 
         plein.setColor(ContextCompat.getColor(getContext(), R.color.gray));
         plein.setStyle(Paint.Style.STROKE);
-        plein.setStrokeWidth(40f);
+        plein.setStrokeWidth(100f);
         plein.setStrokeCap(Paint.Cap.ROUND);
 
         textPaint.setColor(ContextCompat.getColor(getContext(), R.color.black));
