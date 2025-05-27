@@ -57,6 +57,12 @@
         app:popUpTo="@id/navigation_exercise"
         app:popUpToInclusive="true"
         app:launchSingleTop="true"/>
+    <action
+        android:id="@+id/exercise_to_inexercise"
+        app:destination="@id/in_exercise"
+        app:popUpTo="@id/navigation_exercise"
+        app:popUpToInclusive="true"
+        app:launchSingleTop="true"/>
     </fragment>
 
 
@@ -87,6 +93,12 @@
         <action
             android:id="@+id/inexercise_to_execise"
             app:destination="@id/navigation_exercise"
+            app:popUpTo="@id/in_exercise"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+        <action
+            android:id="@+id/inexercise_to_home"
+            app:destination="@id/navigation_home"
             app:popUpTo="@id/in_exercise"
             app:popUpToInclusive="true"
             app:launchSingleTop="true"/>

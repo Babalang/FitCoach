@@ -1,5 +1,7 @@
     package com.example.fitcoach.Services;
 
+    import static android.content.ContentValues.TAG;
+
     import android.Manifest;
     import android.app.Notification;
     import android.app.NotificationChannel;
@@ -15,6 +17,7 @@
     import android.location.LocationListener;
     import android.location.LocationManager;
     import android.os.Build;
+    import android.os.Bundle;
     import android.os.Handler;
     import android.os.IBinder;
     import android.os.Looper;
@@ -29,6 +32,7 @@
     import com.example.fitcoach.Datas.AppDataManager;
     import com.example.fitcoach.MainActivity;
     import com.example.fitcoach.R;
+    import com.example.fitcoach.ui.Exercise.ExerciseStep;
 
     import java.util.ArrayList;
 
@@ -58,8 +62,11 @@
         private float currentCalories = 0;
         private int repetition = 0;
         private String sportType = "marche";
+        private boolean isChronoMode = false;
         private LocationManager locationManager;
         private ArrayList<Location> gpsTrack = new ArrayList<>();
+
+        private ArrayList<ExerciseStep> timerSteps;
         private LocationListener locationListener;
         private final Handler uiHandler = new Handler(Looper.getMainLooper());
         private final Runnable uiRunnable = new Runnable() {
@@ -91,6 +98,7 @@
                     startExercise(intent.getStringExtra("sport"), intent.getBooleanExtra("isChronoMode", false));
                 } else if (intent.getAction().equals(ACTION_INCREMENT_STEP)) {
                     repetition++;
+                    Log.d("InexerciseFragment", "onReceive: Incrementing step, current repetition: " + repetition);
                 } else if (ACTION_REQUEST_STATUS.equals(intent.getAction())) {
                     Intent statusIntent = new Intent(ACTION_SEND_STATUS);
                     // Remplis avec les données en cours
@@ -101,6 +109,7 @@
                     statusIntent.putExtra("speed", speed);
                     statusIntent.putExtra("isRunning", isRunning);
                     statusIntent.putExtra("sportType", sportType);
+                    statusIntent.putExtra("isChronoMode", isChronoMode);  // Ajouter cette info
                     statusIntent.putExtra("repetition", repetition);
                     localBroadcastManager.sendBroadcast(statusIntent);
                 }
@@ -157,12 +166,18 @@
                         "Exercice en cours",
                         NotificationManager.IMPORTANCE_LOW
                 );
+
+                channel.setShowBadge(true);
+                channel.enableLights(true);
+                channel.enableVibration(false);
+                channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                 NotificationManager manager = getSystemService(NotificationManager.class);
                 if (manager != null) {
                     manager.createNotificationChannel(channel);
                 }
             }
-            startForeground(1, createNotification("Exercice en cours..."));
+            Notification intitialNotification = createNotification("Exercice en cours...");
+            startForeground(1,intitialNotification);
             if(intent != null){
                 String action = intent.getAction();
                 if(action != null){
@@ -192,12 +207,18 @@
                     }
                 }
             }
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> {
+                if (isRunning) {
+                    startSendingUIUpdates();
+                }
+            });
             return START_STICKY;
         }
 
         // Démarre un exercice
         public void startExercise(String sport, boolean isChronoMode) {
-            sportType = sport;
+            this.isChronoMode = isChronoMode;
             sportType = (sport != null) ? sport : "marche";
             startTimeMillis = SystemClock.elapsedRealtime();
             initialSteps = AppDataManager.getInstance().getSteps(0);
@@ -227,7 +248,25 @@
 
             Intent intent = new Intent(ACTION_UPDATE_UI);
             intent.putExtra("isPaused", true);
+            intent.putExtra("forceUpdateUI", true); // Indicateur de mise à jour forcée
+            intent.putExtra("steps", totalSteps - initialSteps);
+            intent.putExtra("duration", getElapsedExerciseTimeMillis()/1000);
+            intent.putExtra("calories", currentCalories);
+            intent.putExtra("distance", distance);
+            intent.putExtra("speed", speed);
+            intent.putExtra("repetition", repetition);
             localBroadcastManager.sendBroadcast(intent);
+
+            Intent statusIntent = new Intent(ACTION_SEND_STATUS);
+            statusIntent.putExtra("isRunning", isRunning);
+            statusIntent.putExtra("steps", totalSteps - initialSteps);
+            statusIntent.putExtra("duration", getElapsedExerciseTimeMillis()/1000);
+            statusIntent.putExtra("calories", currentCalories);
+            statusIntent.putExtra("distance", distance);
+            statusIntent.putExtra("speed", speed);
+            statusIntent.putExtra("sportType", sportType);
+            statusIntent.putExtra("repetition", repetition);
+            localBroadcastManager.sendBroadcast(statusIntent);
 
             uiHandler.removeCallbacks(uiRunnable);
         }
@@ -241,24 +280,52 @@
             uiHandler.post(uiRunnable);
             startSendingUIUpdates();
 
-            Intent intent = new Intent(ACTION_UPDATE_UI);
+            Intent intent = new Intent(ACTION_SEND_STATUS);
+            intent.putExtra("isRunning", true);
+            intent.putExtra("steps", totalSteps - initialSteps);
+            intent.putExtra("duration", getElapsedExerciseTimeMillis()/1000);
+            intent.putExtra("calories", currentCalories);
+            intent.putExtra("distance", distance);
+            intent.putExtra("speed", speed);
+            intent.putExtra("sportType", sportType);
+            intent.putExtra("repetition", repetition);
             intent.putExtra("isPaused", false);
+
             localBroadcastManager.sendBroadcast(intent);
         }
 
         // Arrête l'exercice
         public void stopExercise() {
             isRunning = false;
-            Intent intent = new Intent(ACTION_UPDATE_UI);
-            intent.putExtra("isPaused", true);
+            if (locationManager != null && locationListener != null) {
+                locationManager.removeUpdates(locationListener);
+            }
+            Intent intent = new Intent(ACTION_SEND_STATUS);
+            intent.putExtra("isRunning", false);
+            intent.putExtra("steps", totalSteps - initialSteps);
+            intent.putExtra("duration", getElapsedExerciseTimeMillis()/1000);
+            intent.putExtra("calories", currentCalories);
+            intent.putExtra("distance", distance);
+            intent.putExtra("speed", speed);
+            intent.putExtra("sportType", sportType);
+            intent.putExtra("repetition", repetition);
+            intent.putExtra("isStopping", true);
             localBroadcastManager.sendBroadcast(intent);
             uiHandler.removeCallbacks(uiRunnable);
-            stopForeground(true);
-            stopSelf();
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                stopForeground(STOP_FOREGROUND_REMOVE);
+            } else {
+                stopForeground(true);
+            }
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(1);
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                stopSelf();
+            }, 200);
             Toast.makeText(this, "Exercice terminé", Toast.LENGTH_SHORT).show();
         }
 
-        // Envoie les mises à jour de l'UI (notamment pour la notification)
         private void startSendingUIUpdates() {
             totalSteps = AppDataManager.getInstance().getSteps(0);
             estimateDistance();
@@ -270,6 +337,7 @@
             intent.putExtra("calories", currentCalories);
             intent.putExtra("distance", distance);
             intent.putExtra("speed", speed);
+            intent.putExtra("repetition", repetition);
             localBroadcastManager.sendBroadcast(intent);
             String content = String.format("Durée: %ds - Distance: %.2fm - Vitesse: %.2fkm/h",
                 getElapsedExerciseTimeMillis() / 1000,
@@ -311,30 +379,35 @@
 
         // Estimation de la distance parcourue
         private float estimateDistance() {
-            if (gpsTrack.size() < 2) return distance;
+            if(sportType != "marche" && gpsTrack.size() >= 2) {
+                distance = 0;
+                for (int i = 1; i < gpsTrack.size(); i++) {
+                    Location previousLocation = gpsTrack.get(i - 1);
+                    Location currentLocation = gpsTrack.get(i);
+                    distance += previousLocation.distanceTo(currentLocation); // distance en mètres
+                }
 
-            distance = 0; // Réinitialiser la distance
-
-            // Calculer la distance totale en parcourant tous les segments
-            for (int i = 1; i < gpsTrack.size(); i++) {
-                Location previousLocation = gpsTrack.get(i - 1);
-                Location currentLocation = gpsTrack.get(i);
-                distance += previousLocation.distanceTo(currentLocation); // distance en mètres
-            }
-
-            // Conversion en kilomètres
-            distance = distance / 1000f;
-
-            // Calculer la vitesse basée sur la distance totale et la durée écoulée
-            if (gpsTrack.size() > 1) {
+                // Calcul de la vitesse seulement si nous avons au moins 2 points
                 Location lastLocation = gpsTrack.get(gpsTrack.size() - 1);
                 Location secondLastLocation = gpsTrack.get(gpsTrack.size() - 2);
-                long timeDelta = lastLocation.getTime() - secondLastLocation.getTime(); // en millisecondes
+                long timeDelta = lastLocation.getTime() - secondLastLocation.getTime();
                 if (timeDelta > 0) {
-                    speed = (distance / (timeDelta / 1000f)) * 3.6f; // Conversion en km/h
+                    speed = (distance / (timeDelta / 1000f)) * 3.6f;
+                }
+            } else {
+                // Mode pas à pas ou pas assez de points GPS
+                distance = 0;
+                int stepCount = totalSteps - initialSteps;
+                distance = stepCount * 0.7f;
+
+                // Dans ce cas la vitesse est calculée par rapport au temps écoulé
+                long elapsedSeconds = getElapsedExerciseTimeMillis() / 1000;
+                if (elapsedSeconds > 0) {
+                    speed = (distance / elapsedSeconds) * 3.6f;  // km/h
                 }
             }
 
+            distance = distance / 1000f;  // Convertir en km
             return distance;
         }
 
@@ -365,7 +438,10 @@
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentIntent(pendingIntent)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setSound(null)
+                    .setVibrate(null)
                     .setOngoing(true);
+
 
             if (isRunning) {
                 notificationBuilder.addAction(android.R.drawable.ic_media_pause, "Pause", pausePendingIntent);

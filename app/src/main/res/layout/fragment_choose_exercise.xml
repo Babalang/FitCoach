@@ -31,13 +31,13 @@
             android:id="@+id/gps_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Chronomètre" />
+            android:text="Endurance" />
 
         <RadioButton
             android:id="@+id/timer_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Timer" />
+            android:text="Force" />
     </RadioGroup>
 
     <!-- Spinner sport -->

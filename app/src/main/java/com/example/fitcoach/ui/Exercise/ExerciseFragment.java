@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.fitcoach.R;
+import com.example.fitcoach.Services.ExerciseService;
 import com.example.fitcoach.Services.LocationService;
 import com.example.fitcoach.databinding.FragmentExerciseBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -43,6 +45,11 @@ public class ExerciseFragment extends Fragment {
     private MapView map;
     private LocationReceiver locationReceiver;
     private LocalBroadcastManager localBroadcastManager;
+    private ServiceCheckReceiver serviceCheckReceiver;
+
+    private boolean isServiceActive = false;
+    private String currentSportType = null;
+    private String currentExerciseType = null;
     private static final String TAG = "ExerciseFragment";
     private Marker myPositionMarker;
     private boolean isReceiverRegistered = false;
@@ -62,22 +69,85 @@ public class ExerciseFragment extends Fragment {
         Log.d(TAG, "onCreateView: called");
         binding = FragmentExerciseBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        //set map
+        localBroadcastManager = LocalBroadcastManager.getInstance(requireContext());
         Context ctx = requireContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         map = root.findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMultiTouchControls(true);
-        //set start position
-
-        //init myPositionMarker
         initPositionMarker();
+        checkServiceStatus();
         Button btn1 = root.findViewById(R.id.button1);
         btn1.setOnClickListener(v -> {
-            NavController navController = NavHostFragment.findNavController(this);
-            navController.navigate(R.id.exercise_to_choose);
+                NavController navController = NavHostFragment.findNavController(this);
+                navController.navigate(R.id.exercise_to_choose);
         });
+
         return root;
+    }
+
+    private void checkServiceStatus() {
+        if (serviceCheckReceiver == null) {
+            serviceCheckReceiver = new ServiceCheckReceiver();
+        }
+
+        // Enregistrer le récepteur pour obtenir la réponse du service
+        if (!isReceiverRegistered) {
+            IntentFilter filter = new IntentFilter(ExerciseService.ACTION_SEND_STATUS);
+            localBroadcastManager.registerReceiver(serviceCheckReceiver, filter);
+            isReceiverRegistered = true;
+            Log.d(TAG, "Récepteur enregistré pour vérifier le statut du service");
+        }
+
+        // Envoyer une demande de statut
+        Intent statusRequest = new Intent(ExerciseService.ACTION_REQUEST_STATUS);
+        localBroadcastManager.sendBroadcast(statusRequest);
+        Log.d(TAG, "Demande de statut envoyée au service");
+        new Handler().postDelayed(() -> {
+            if (!isServiceActive && isReceiverRegistered) {
+                unregisterServiceReceiver();
+                Log.d(TAG, "Aucune réponse du service après délai d'attente");
+            }
+        }, 1000);
+    }
+
+    private void navigateToInExercise() {
+        Bundle bundle = new Bundle();
+        bundle.putString("selected_sport", currentSportType != null ? currentSportType : "marche");
+        bundle.putString("exercise_type", currentExerciseType != null ? currentExerciseType : "chrono");
+
+        NavController controller = NavHostFragment.findNavController(this);
+        controller.navigate(R.id.exercise_to_inexercise, bundle);
+        Log.d(TAG, "Navigation directe vers l'exercice en cours: " + currentSportType + ", " + currentExerciseType);
+    }
+
+    private class ServiceCheckReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ExerciseService.ACTION_SEND_STATUS.equals(intent.getAction())) {
+                isServiceActive = true;
+                currentSportType = intent.getStringExtra("sportType");
+                boolean isRunning = intent.getBooleanExtra("isRunning", true);
+
+                Log.d(TAG, "Réponse du service reçue - sport: " + currentSportType + ", isRunning: " + isRunning);
+
+                // Si service est en cours, naviguer directement vers InExerciseFragment
+                if (isServiceActive) {
+                    currentExerciseType = (intent.getBooleanExtra("isChronoMode", true)) ? "chrono" : "timer";
+                    navigateToInExercise();
+                }
+
+                unregisterServiceReceiver();
+            }
+        }
+    }
+
+    private void unregisterServiceReceiver() {
+        if (isReceiverRegistered && serviceCheckReceiver != null) {
+            localBroadcastManager.unregisterReceiver(serviceCheckReceiver);
+            isReceiverRegistered = false;
+            Log.d(TAG, "Récepteur de vérification de service désenregistré");
+        }
     }
 
     @Override
@@ -86,6 +156,7 @@ public class ExerciseFragment extends Fragment {
         registerReceiver();
         map.onResume();
         getLastLocation();
+        checkServiceStatus();
     }
 
     @Override
@@ -124,6 +195,12 @@ public class ExerciseFragment extends Fragment {
             isReceiverRegistered = true;
             Log.d(TAG, "registerReceiver: LocationReceiver registered");
         }
+        if (!isReceiverRegistered) {
+            serviceCheckReceiver = new ServiceCheckReceiver();
+            IntentFilter filter = new IntentFilter(ExerciseService.ACTION_SEND_STATUS);
+            localBroadcastManager.registerReceiver(serviceCheckReceiver, filter);
+            isReceiverRegistered = true;
+        }
     }
 
     private void unregisterReceiver() {
@@ -134,6 +211,10 @@ public class ExerciseFragment extends Fragment {
             Log.d(TAG, "unregisterReceiver: LocationReceiver unregistered");
         } else {
             Toast.makeText(requireContext(), "Receiver not registered", Toast.LENGTH_SHORT).show();
+        }
+        if (isReceiverRegistered && localBroadcastManager != null && serviceCheckReceiver != null) {
+            localBroadcastManager.unregisterReceiver(serviceCheckReceiver);
+            isReceiverRegistered = false;
         }
     }
     private void initPositionMarker() {
@@ -153,13 +234,6 @@ public class ExerciseFragment extends Fragment {
     private void getLastLocation() {
         Log.d(TAG, "getLastLocation: function called");
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             Log.e(TAG, "getLastLocation: permission not granted");
             return;
         }

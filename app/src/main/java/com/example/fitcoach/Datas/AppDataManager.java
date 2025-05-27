@@ -11,7 +11,7 @@ import android.widget.Toast;
 public class AppDataManager {
     private static final String TAG = "AppDataManager";
     private static final String DATABASE_NAME = "fitcoach_data";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private static final String TABLE_COMPTE = "comptes";
 
@@ -226,17 +226,34 @@ public class AppDataManager {
     }
 
     public int getSteps(int id) {
-        String query = "SELECT " + COLUMN_STEPS + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
-        int steps = 0;
-        if (cursor.moveToFirst()) {
-            steps = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STEPS));
+        try{
+            if(db == null || !db.isOpen()){
+                db = dHelper.getWritableDatabase();
+            }
+            String query = "SELECT " + COLUMN_STEPS + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
+            Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
+            int steps = 0;
+            if (cursor.moveToFirst()) {
+                steps = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STEPS));
+            }
+            cursor.close();
+            return steps;
+        } catch (Exception e){
+            Log.e(TAG, "Erreur lors de l'ouverture de la base de données: " + e.getMessage());
+            return 0;
         }
-        cursor.close();
-        return steps;
+
     }
 
     public float getCalories(int id) {
+        SQLiteDatabase db = null;
+        try {
+            db = dHelper.getWritableDatabase();
+            // Suite du code
+        } catch (Exception e) {
+            Log.e("AppDataManager", "Erreur d'accès à la base de données", e);
+            return 0; // Valeur par défaut
+        }
         String query = "SELECT " + COLUMN_CALORIES + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
         float calories = 0;

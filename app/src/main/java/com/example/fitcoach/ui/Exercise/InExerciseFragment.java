@@ -1,9 +1,5 @@
 package com.example.fitcoach.ui.Exercise;
 
-import static android.app.PendingIntent.getActivity;
-
-import static java.security.AccessController.getContext;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,10 +22,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.fitcoach.MainActivity;
 import com.example.fitcoach.R;
 import com.example.fitcoach.Services.ExerciseService;
-import com.example.fitcoach.ui.Exercise.ExerciseStep;
 import com.example.fitcoach.utils.Timer;
 
 import java.util.ArrayList;
@@ -69,7 +63,7 @@ public class InExerciseFragment extends Fragment {
         if ("timer".equals(viewModel.getExerciseType().getValue())) {
             view = inflater.inflate(R.layout.fragment_in_exercise_timer, container, false);
             viewModel.setSteps((ArrayList<ExerciseStep>)args.getSerializable("timer_steps"));
-            if (viewModel.getSteps() == null || viewModel.getSteps().isInitialized()) {
+            if (viewModel.getSteps() == null || !viewModel.getSteps().isInitialized()) {
                 Toast.makeText(getContext(), "Aucune étape trouvée", Toast.LENGTH_SHORT).show();
                 return view;
             }
@@ -130,122 +124,140 @@ public class InExerciseFragment extends Fragment {
             localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
             timer.stop();
             Toast.makeText(getContext(), "Exercice terminé", Toast.LENGTH_SHORT).show();
-            NavHostFragment.findNavController(this).navigate(R.id.inexercise_to_execise);
         });
     }
 
     private void setupTimerView(View view) {
-        viewModel.getCurrentStepIndex().observe(getViewLifecycleOwner(), val -> {
-            if (current_step_value != null && viewModel.getSteps().getValue() != null && val < viewModel.getSteps().getValue().size()){
-                current_step_value.setText(viewModel.getSteps().getValue().get(val).getName());
-                if(next_step_value != null && val + 1 < viewModel.getSteps().getValue().size()){
-                    next_step_value.setText(viewModel.getSteps().getValue().get(val + 1).getName());
-                } else if(next_step_value != null){
-                    next_step_value.setText("Fin de l'exercice");
-                }
-
-                if(timer != null){
-                    timer.setCountdown(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getDuration());
-                    if(viewModel.getIsPaused().getValue()){
-                        timer.start();
-                    } else {
-                        timer.stop();
-                    }
-                }
-            }
-        });
-
+        timer = view.findViewById(R.id.time_value);
         current_step_value = view.findViewById(R.id.current_step_value);
         next_step_value = view.findViewById(R.id.next_step_value);
-        localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
-        timer = view.findViewById(R.id.time_value);
-        timer.setCountdown(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getDuration());
-        timer.setTimerListener(() -> {
-            Toast.makeText(requireContext(), "Temps écoulé", Toast.LENGTH_SHORT).show();
-            if (viewModel.getCurrentStepIndex().getValue() + 1 < viewModel.getSteps().getValue().size()) {
-                viewModel.incrementStep();
-                current_step_value.setText(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getName());
-                if (viewModel.getCurrentStepIndex().getValue() + 1 < viewModel.getSteps().getValue().size())
-                    next_step_value.setText(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue() + 1).getName());
-                timer.setCountdown(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getDuration());
-                timer.start();
-            } else {
-                new AlertDialog.Builder(requireContext())
-                        .setTitle("Exercice terminé")
-                        .setMessage("Veux-tu recommencer ?")
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            viewModel.setCurrentStep(0);
-                            current_step_value.setText(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getName());
-                            if (viewModel.getCurrentStepIndex().getValue() + 1 < viewModel.getSteps().getValue().size())
-                                next_step_value.setText(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue() + 1).getName());
-                            timer.setCountdown(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getDuration());
-                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
-                            timer.start();
-                        })
-                        .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                            Log.d("InExerciseFragment", "Le service d'exercice a été arrêté.");
-                            timer.stop();
-                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
-                            NavHostFragment.findNavController(InExerciseFragment.this).navigate(R.id.inexercise_to_execise);
-                        })
-                        .setIconAttribute(android.R.attr.alertDialogIcon)
-                        .show();
-            }
-        });
-        Button restart = view.findViewById(R.id.btn_restart);
-        restart.setOnClickListener(v -> {
-            timer.setCountdown(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getDuration());
-            timer.start();
-            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_START));
-        });
-        Button next = view.findViewById(R.id.btn_next_step);
-        next.setOnClickListener(v -> {
-            if (viewModel.getCurrentStepIndex().getValue() + 1 < viewModel.getSteps().getValue().size()) {
-                viewModel.incrementStep();
-                timer.setCountdown(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getDuration());
-                timer.start();
-            } else {
-                new AlertDialog.Builder(requireContext())
-                        .setTitle("Exercice terminé")
-                        .setMessage("Veux-tu recommencer ?")
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            viewModel.setCurrentStep(0);
-                            timer.setCountdown(viewModel.getSteps().getValue().get(viewModel.getCurrentStepIndex().getValue()).getDuration());
-                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
-                            timer.start();
-                        })
-                        .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                            Log.d("InExerciseFragment", "Le service d'exercice a été arrêté.");
-                            timer.stop();
-                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
-                            NavHostFragment.findNavController(InExerciseFragment.this).navigate(R.id.inexercise_to_execise);
-                        })
-                        .setIconAttribute(android.R.attr.alertDialogIcon)
-                        .show();
-            }
-        });
-        Button pause = view.findViewById(R.id.pause_button);
-        pause.setOnClickListener(v -> {
-            if (timer.isRunning()) {
-                timer.stop();
-                pause.setText("Reprendre");
-                Toast.makeText(getContext(), "Pause", Toast.LENGTH_SHORT).show();
-                localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_PAUSE));
-            } else {
-                timer.start();
-                pause.setText("Pause");
-                localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_RESUME));
-                Toast.makeText(getContext(), "Reprise", Toast.LENGTH_SHORT).show();
+        Button pauseButton = view.findViewById(R.id.pause_button);
+        Button stopButton = view.findViewById(R.id.stop_button);
+        Button nextStepButton = view.findViewById(R.id.btn_next_step);
+        Button restartButton = view.findViewById(R.id.btn_restart);
+
+        // Observer pour les changements d'étapes
+        viewModel.getCurrentStepIndex().observe(getViewLifecycleOwner(), index -> {
+            ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
+            if (current_step_value != null && steps != null && index < steps.size()) {
+                // Mettre à jour le texte de l'étape actuelle
+                current_step_value.setText(steps.get(index).getName());
+
+                // Mettre à jour le texte de la prochaine étape
+                if (next_step_value != null) {
+                    if (index + 1 < steps.size()) {
+                        next_step_value.setText(steps.get(index + 1).getName());
+                    } else {
+                        next_step_value.setText("Fin de l'exercice");
+                    }
+                }
+
+                // Configurer le timer avec la durée de l'étape actuelle
+                if (timer != null) {
+                    timer.setCountdown(steps.get(index).getDuration());
+                    timer.reset();
+                    timer.start();
+                }
             }
         });
 
-        view.findViewById(R.id.stop_button).setOnClickListener(v -> {
-            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
-            timer.stop();
-            Toast.makeText(getContext(), "Exercice terminé", Toast.LENGTH_SHORT).show();
-            NavHostFragment.findNavController(this).navigate(R.id.inexercise_to_execise);
+        // Définir le comportement quand le timer termine
+        timer.setTimerListener(() -> {
+            ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
+            Integer currentIndex = viewModel.getCurrentStepIndex().getValue();
+
+            if (steps != null && currentIndex != null && currentIndex + 1 < steps.size()) {
+                // Passer à l'étape suivante
+                localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
+
+            } else {
+                // Afficher dialogue de fin d'exercice
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Exercice terminé")
+                        .setMessage("Veux-tu recommencer ?")
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            // Recommencer l'exercice
+                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
+                            timer.start();
+                        })
+                        .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                            // Terminer l'exercice
+                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
+                            timer.stop();
+                        })
+                        .setCancelable(false)
+                        .show();
+            }
         });
-        timer.start();
+
+        // Configuration du bouton pause
+        pauseButton.setOnClickListener(v -> {
+            if (timer.isRunning()) {
+                timer.stop();
+                pauseButton.setText("Reprendre");
+                localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_PAUSE));
+                Toast.makeText(requireContext(), "Pause", Toast.LENGTH_SHORT).show();
+            } else {
+                timer.start();
+                pauseButton.setText("Pause");
+                localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_RESUME));
+                Toast.makeText(requireContext(), "Reprise", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Configuration du bouton stop
+        stopButton.setOnClickListener(v -> {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Arrêter l'exercice")
+                    .setMessage("Voulez-vous vraiment arrêter l'exercice ?")
+                    .setPositiveButton("Oui", (dialog, which) -> {
+                        timer.stop();
+                        localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
+                    })
+                    .setNegativeButton("Non", null)
+                    .show();
+        });
+
+        // Configuration du bouton étape suivante
+        nextStepButton.setOnClickListener(v -> {
+            if(viewModel.getCurrentStepIndex().getValue() + 1 < viewModel.getSteps().getValue().size()) {
+                localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
+            } else {
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Exercice terminé")
+                        .setMessage("Veux-tu recommencer ?")
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            // Recommencer l'exercice
+                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
+                            timer.start();
+                        })
+                        .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                            // Terminer l'exercice
+                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
+                            timer.stop();
+                        })
+                        .setCancelable(false)
+                        .show();
+            }
+            Log.d("InExerciseFragment", "nextStepButton clicked");
+        });
+
+        // Configuration du bouton redémarrer
+        restartButton.setOnClickListener(v -> {
+            timer.reset();
+            timer.start();
+        });
+
+        // Initialiser avec la première étape
+        viewModel.setCurrentStepIndex(0);
+
+        // Démarrer le timer
+        ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
+        if (steps != null && !steps.isEmpty()) {
+            timer.setCountdown(steps.get(0).getDuration());
+            timer.reset();
+            timer.start();
+        }
     }
 
     @Override
@@ -308,8 +320,15 @@ public class InExerciseFragment extends Fragment {
                     float speed = intent.getFloatExtra("speed", 0);
                     boolean isPaused = !intent.getBooleanExtra("isRunning", true);
                     int repetition = intent.getIntExtra("repetition", 0);
+                    boolean isStopping = intent.getBooleanExtra("isStopping", false);
                     Log.d("ExerciseFragmentReceiver", "onReceive: " + duration+" "+calories+" "+distance+" "+speed);
-                    // Mise à jour dans le ViewModel
+                    if(isStopping){
+                        if(timer != null) timer.stop();
+                        if(getView() != null && isAdded() && !isRemoving()){
+                            NavHostFragment.findNavController(InExerciseFragment.this).navigate(R.id.inexercise_to_home);
+                        }
+                        return;
+                    }
                     viewModel.setCurrentStep(steps);
                     viewModel.setDuration(duration);
                     viewModel.setCalories(calories);
@@ -317,8 +336,10 @@ public class InExerciseFragment extends Fragment {
                     viewModel.setSpeed(speed);
                     viewModel.setIsPaused(isPaused);
 
+                    Log.d("inExerciseFragment", "onReceive: " + repetition);
                     if ("timer".equals(viewModel.getExerciseType().getValue())) {
-                        viewModel.setCurrentStepIndex(repetition);
+                        Log.d("inExerciseFragment", "onReceive: " + repetition);
+                        viewModel.setCurrentStepIndex(repetition % (viewModel.getSteps().getValue().size()));
                     }
                     if (timer != null) {
                         if ("chrono".equals(viewModel.getExerciseType().getValue())) {
@@ -340,14 +361,23 @@ public class InExerciseFragment extends Fragment {
                     float calories = intent.getFloatExtra("calories", 0);
                     float distance = intent.getFloatExtra("distance", 0);
                     float speed = intent.getFloatExtra("speed", 0);
+                    String currentStepName = intent.getStringExtra("currentSteps");
+                    String nextStepName = intent.getStringExtra("nextSteps");
                     Log.d("ExerciseFragmentReceiver", "onReceive: " + steps+" "+calories+" "+distance+" "+speed);
-                    // Mise à jour dans le ViewModel
+                    int repetition = intent.getIntExtra("repetition", 0);
                     viewModel.setCurrentStep(steps);
                     viewModel.setDuration(duration);
                     viewModel.setCalories(calories);
                     viewModel.setDistance(distance);
                     viewModel.setSpeed(speed);
+                    Log.d("inExerciseFragment", "onReceive: " + repetition);
+                    if ("timer".equals(viewModel.getExerciseType().getValue()) && viewModel.getSteps() != null && viewModel.getSteps().getValue() != null && viewModel.getCurrentStepIndex().getValue() != (repetition % (viewModel.getSteps().getValue().size())) ) {
+                        Log.d("inExerciseFragment", "onReceive: " + repetition);
+                        viewModel.setCurrentStepIndex(repetition % (viewModel.getSteps().getValue().size()));
+                    }
                 }
+
+
             }
         }
     }
@@ -384,8 +414,12 @@ public class InExerciseFragment extends Fragment {
         intent.setAction(ExerciseService.ACTION_START);
         intent.putExtra("sport", viewModel.getSportType().getValue());
         intent.putExtra("isChronoMode", "chrono".equals(viewModel.getExerciseType().getValue()));
-        if (viewModel.getSteps() != null) {
-            intent.putExtra("steps", viewModel.getSteps().getValue());
+
+        ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
+        if (viewModel.getSteps() != null && steps != null && !steps.isEmpty()) {
+            Bundle stepsBundle = new Bundle();
+            stepsBundle.putSerializable("steps", steps);
+            intent.putExtras(stepsBundle);
         }
         requireContext().startService(intent);
         localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_START));

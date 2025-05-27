@@ -103,12 +103,12 @@ public class ChooseExerciseFragment extends Fragment {
                 });
             } else if (checkedId == R.id.timer_radio) {
                 stepsRecycler.setVisibility(View.VISIBLE);
-                addStepButton.setVisibility(View.VISIBLE);
+                //addStepButton.setVisibility(View.VISIBLE);
 
-                addStepButton.setOnClickListener(v -> {
-                    timerSteps.add(new ExerciseStep("Nouvelle étape", 30));
-                    adapter.notifyItemInserted(timerSteps.size() - 1);
-                });
+                //addStepButton.setOnClickListener(v -> {
+                //    timerSteps.add(new ExerciseStep("Nouvelle étape", 30));
+                //    adapter.notifyItemInserted(timerSteps.size() - 1);
+                //});
 
                 sportImage.setVisibility(View.VISIBLE);
                 sportSpinner.setVisibility(View.VISIBLE);
@@ -139,8 +139,8 @@ public class ChooseExerciseFragment extends Fragment {
         startButton.setOnClickListener(v -> {
             String selectedSport = (String) sportSpinner.getSelectedItem();
             int checkedId = group.getCheckedRadioButtonId();
-            boolean isChrono = (checkedId == R.id.gps_radio);
-            String exerciseType = isChrono ? "chrono" : "timer";
+            boolean isChrono = true;
+            String exerciseType = "chrono";
 
             ArrayList<ExerciseStep> stepsToSend = isChrono ? new ArrayList<>() : new ArrayList<>(timerSteps);
 
