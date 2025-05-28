@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -17,9 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.fitcoach.R;
@@ -27,6 +30,7 @@ import com.example.fitcoach.Services.ExerciseService;
 import com.example.fitcoach.utils.Timer;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class InExerciseFragment extends Fragment {
     private ExerciseViewModel viewModel;
@@ -78,17 +82,15 @@ public class InExerciseFragment extends Fragment {
         });
         viewModel.getCalories().observe(getViewLifecycleOwner(), val -> {
             if (textCalories != null)
-                textCalories.setText("Calories : " + val + " kcal");
+                textCalories.setText("Calories : " + String.format(Locale.getDefault(), "%.2f", val) + " kcal");
         });
-
         viewModel.getDistance().observe(getViewLifecycleOwner(), val -> {
             if (textDistance != null)
-                textDistance.setText("Distance : " + val + " km");
+                textDistance.setText("Distance : " + String.format(Locale.getDefault(), "%.2f", val) + " km");
         });
-
         viewModel.getSpeed().observe(getViewLifecycleOwner(), val -> {
             if (textSpeed != null)
-                textSpeed.setText("Vitesse : " + val + " km/h");
+                textSpeed.setText("Vitesse : " + String.format(Locale.getDefault(), "%.2f", val) + " km/h");
         });
 
 
@@ -121,8 +123,8 @@ public class InExerciseFragment extends Fragment {
         });
 
         view.findViewById(R.id.stop_button).setOnClickListener(v -> {
-            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
             timer.stop();
+            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
             Toast.makeText(getContext(), "Exercice terminé", Toast.LENGTH_SHORT).show();
         });
     }
@@ -182,8 +184,8 @@ public class InExerciseFragment extends Fragment {
                         })
                         .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
                             // Terminer l'exercice
-                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
                             timer.stop();
+                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
                         })
                         .setCancelable(false)
                         .show();
@@ -233,8 +235,9 @@ public class InExerciseFragment extends Fragment {
                         })
                         .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
                             // Terminer l'exercice
-                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
                             timer.stop();
+                            localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
+
                         })
                         .setCancelable(false)
                         .show();
@@ -300,7 +303,7 @@ public class InExerciseFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            NavHostFragment.findNavController(this).navigate(R.id.inexercise_to_execise);
+            NavHostFragment.findNavController(this).navigate(R.id.inexercise_to_home);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -320,25 +323,35 @@ public class InExerciseFragment extends Fragment {
                     float speed = intent.getFloatExtra("speed", 0);
                     boolean isPaused = !intent.getBooleanExtra("isRunning", true);
                     int repetition = intent.getIntExtra("repetition", 0);
-                    boolean isStopping = intent.getBooleanExtra("isStopping", false);
-                    Log.d("ExerciseFragmentReceiver", "onReceive: " + duration+" "+calories+" "+distance+" "+speed);
-                    if(isStopping){
-                        if(timer != null) timer.stop();
-                        if(getView() != null && isAdded() && !isRemoving()){
-                            NavHostFragment.findNavController(InExerciseFragment.this).navigate(R.id.inexercise_to_home);
-                        }
-                        return;
-                    }
                     viewModel.setCurrentStep(steps);
                     viewModel.setDuration(duration);
                     viewModel.setCalories(calories);
                     viewModel.setDistance(distance);
                     viewModel.setSpeed(speed);
                     viewModel.setIsPaused(isPaused);
+                    if (intent.getBooleanExtra("isStopping", false) &&
+                            intent.getBooleanExtra("showSummary", false)) {
+                        Bundle summaryData = new Bundle();
+                        summaryData.putInt("steps", intent.getIntExtra("steps", 0));
+                        summaryData.putLong("duration", intent.getLongExtra("duration", 0));
+                        Log.d("ExerciseFragmentReceiver", "onReceive: " +  viewModel.getDuration().getValue());
+                        summaryData.putFloat("calories", intent.getFloatExtra("calories", 0));
+                        summaryData.putFloat("distance", intent.getFloatExtra("distance", 0));
+                        summaryData.putFloat("speed", intent.getFloatExtra("speed", 0));
+                        summaryData.putString("sportType", intent.getStringExtra("sportType"));
+                        summaryData.putInt("repetition", intent.getIntExtra("repetition", 0));
 
-                    Log.d("inExerciseFragment", "onReceive: " + repetition);
+                        // Utiliser un Handler pour retarder la navigation et s'assurer qu'elle s'exécute sur le thread UI
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            try {
+                                NavController navController = NavHostFragment.findNavController(InExerciseFragment.this);
+                                navController.navigate(R.id.inexercise_to_summary, summaryData);
+                            } catch (Exception e) {
+                                Log.e("ExerciseFragmentReceiver", "Erreur de navigation: " + e.getMessage());
+                            }
+                        }, 300);
+                    }
                     if ("timer".equals(viewModel.getExerciseType().getValue())) {
-                        Log.d("inExerciseFragment", "onReceive: " + repetition);
                         viewModel.setCurrentStepIndex(repetition % (viewModel.getSteps().getValue().size()));
                     }
                     if (timer != null) {
