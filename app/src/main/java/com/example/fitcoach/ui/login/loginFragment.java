@@ -1,6 +1,7 @@
 package com.example.fitcoach.ui.login;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,10 +18,19 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.R;
+import com.example.fitcoach.Serveur.ApiService;
+import com.example.fitcoach.Serveur.RetrofitClient;
+import com.example.fitcoach.Serveur.User;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class loginFragment extends Fragment {
     private long coords[];
     private AppDataManager appDataManager;
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

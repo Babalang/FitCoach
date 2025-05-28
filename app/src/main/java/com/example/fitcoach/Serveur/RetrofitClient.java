@@ -1,4 +1,4 @@
-package com.example.fitcoach.ui.Social;
+package com.example.fitcoach.Serveur;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;

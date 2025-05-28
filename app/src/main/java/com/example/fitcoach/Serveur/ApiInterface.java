@@ -1,4 +1,4 @@
-package com.example.fitcoach.ui.Social;
+package com.example.fitcoach.Serveur;
 
 import java.util.List;
 

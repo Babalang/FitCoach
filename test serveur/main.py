@@ -48,13 +48,30 @@ def getAllUsers():
         Users.append(utilisateur)
     return jsonify(Users)
 
-@app.route("/moi")
+@app.route("/moi", methods=["GET", "POST"])
 def getMe():
     nom = request.form["nom"]
     user = User.query.filter_by(nom=nom).first()
     if user:
-        utilisateur = {"nom": user.nom, "score": user.score}
+        utilisateur = {"nom": user.nom, "score": user.score, "ami1": user.ami1, "ami2": user.ami2, "ami3": user.ami3, "ami4": user.ami4, "ami5": user.ami5}
+        if user.ami1:
+            score1=User.query.filter_by(nom=user.ami1).first()
+            utilisateur["ami1Score"]=score1.score
+        if user.ami2:
+            score2=User.query.filter_by(nom=user.ami2).first()
+            utilisateur["ami2Score"]=score2.score
+        if user.ami3:
+            score3=User.query.filter_by(nom=user.ami3).first()
+            utilisateur["ami3Score"]=score3.score
+        if user.ami4:
+            score4=User.query.filter_by(nom=user.ami4).first()
+            utilisateur["ami4Score"]=score4.score
+        if user.ami5:
+            score5=User.query.filter_by(nom=user.ami5).first()
+            utilisateur["ami5Score"]=score5.score
+        # utilisateur = {"nom": user.nom, "score": user.score, "ami1": user.ami1, "ami2": user.ami2, "ami3": user.ami3, "ami4": user.ami4, "ami5": user.ami5}
         return jsonify(utilisateur)
+        # return jsonify({"success": True, "message": "Score mis à jour"})
     else:
         return jsonify({"success": False, "message": "Utilisateur non trouvé"}), 404
 
@@ -64,7 +81,7 @@ def createuser():
     if request.method == "POST":
         user = User(
             nom=request.form["nom"],
-            score=request.form["score"],
+            score="0",
             # ami1=request.form["ami1"],
             # ami2=request.form["ami2"],
             # ami3=request.form["ami3"],

@@ -5,12 +5,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.R;
+import com.example.fitcoach.Serveur.ApiService;
+import com.example.fitcoach.Serveur.RetrofitClient;
+import com.example.fitcoach.Serveur.User;
 import com.example.fitcoach.databinding.FragmentSocialBinding;
 
 import java.io.IOException;
@@ -26,6 +32,10 @@ public class SocialFragment extends Fragment {
     private FragmentSocialBinding binding;
     private TextView id;
     private TextView score;
+    private TextView Textami;
+    private String scoreAmi;
+    private Button boutonAjouteAmi;
+    private EditText texteAjoutAmi;
 
 
     private void fetchAllUsers() {
@@ -41,8 +51,8 @@ public class SocialFragment extends Fragment {
                         Log.d(TAG, "Utilisateurs récupérés: " + userList.size());
                         for (User user : userList) {
                             Log.d(TAG, "User: " + user.getNom());
-                            //id.setText(user.getNom());
-                            //score.setText(user.getScore());
+                            id.setText(user.getNom());
+                            score.setText(user.getScore());
                         }
                     } else {
                         Log.e(TAG, "Réponse réussie mais corps vide ou liste vide pour getUsers");
@@ -66,7 +76,7 @@ public class SocialFragment extends Fragment {
         });
     }
 
-    private void fetchUserById(int userId) {
+    private void fetchUserById(String userId) {
         ApiService apiService = RetrofitClient.getInstance();
         Call<User> call = apiService.getUserById(userId);
         call.enqueue(new Callback<User>() {
@@ -76,7 +86,28 @@ public class SocialFragment extends Fragment {
                     User user = response.body();
                     if (user != null) {
                         Log.d(TAG, "Utilisateur récupéré: " + user.toString());
-                        // iiiiiiiiiiiiii
+                        id.setText(user.getNom());
+                        score.setText(user.getScore());
+                        String amis="";
+                        if(user.getAmi1()!=null){
+                            Log.d(TAG, "score ami: " + user.getAmi1Score());
+                            amis+="Ami : "+user.getAmi1()+". Son score est de : "+user.getAmi1Score()+"\n";
+                            if(user.getAmi2()!=null){
+                                amis+="Ami : "+user.getAmi2()+". Son score est de : "+user.getAmi2Score()+"\n";
+                            }
+                            if(user.getAmi3()!=null){
+                                amis+="Ami : "+user.getAmi3()+". Son score est de : "+user.getAmi3Score()+"\n";
+                            }
+                            if(user.getAmi4()!=null){
+                                amis+="Ami : "+user.getAmi4()+". Son score est de : "+user.getAmi4Score()+"\n";
+                            }
+                            if(user.getAmi5()!=null){
+                                amis+="Ami : "+user.getAmi5()+". Son score est de : "+user.getAmi5Score()+"\n";
+                            }
+                        }else{
+                            amis="Aucun ami\n";
+                        }
+                        Textami.setText(amis);
                     } else {
                         Log.e(TAG, "Réponse réussie mais corps vide pour getUserById " + userId);
                     }
@@ -99,14 +130,45 @@ public class SocialFragment extends Fragment {
         });
     }
 
+    private String ajouterAmi(String nom,String ami){
+        ApiService apiService = RetrofitClient.getInstance();
+        Call<User> call = apiService.nouveauAmi(nom,ami);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "ajout ami : "+ami);
+                } else {
+                    Log.e(TAG, "Nom non valide");
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                Log.e(TAG, "Nom non valide");
+            }
+        });
+        return scoreAmi;
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_social, container, false);
-        //id=view.findViewById(R.id.id);
-        //score=view.findViewById(R.id.score);
-        fetchAllUsers();
+        AppDataManager appDataManager = AppDataManager.getInstance(getContext());
+        int ide = appDataManager.getCompteId();
+        AppDataManager.Compte compte = appDataManager.getCompteById(ide);
+        id=view.findViewById(R.id.id);
+        score=view.findViewById(R.id.score);
+        Textami=view.findViewById(R.id.listeAmi);
+        boutonAjouteAmi=view.findViewById(R.id.BoutonAjoutAmi);
+        texteAjoutAmi=view.findViewById(R.id.TexteAjoutAmi);
+        boutonAjouteAmi.setOnClickListener(v->{
+            ajouterAmi(compte.getLogin(),texteAjoutAmi.getText().toString());
+        });
 
+        //fetchAllUsers();
+
+        fetchUserById(compte.getLogin());
         return view;
     }
 
