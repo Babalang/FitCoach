@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- CardView pour les informations principales -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_container"
         android:layout_width="0dp"
@@ -66,7 +65,6 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- CardView pour l'historique -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_container_history"
         android:layout_width="0dp"

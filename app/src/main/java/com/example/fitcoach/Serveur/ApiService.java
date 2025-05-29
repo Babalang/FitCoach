@@ -7,13 +7,6 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 public interface ApiService {
-    // ... (ta méthode POST existante si tu l'as en Java)
-    // @POST("api/data")
-    // Call<ServerResponse> sendData(@Body MyData data);
-
-    //@GET("api/users") // Endpoint pour obtenir la liste des utilisateurs
-    //Call<List<User>> getUsers(); // Attend une liste d'objets User
-
     @FormUrlEncoded
     @POST("/moi")
     Call<User> getUserById(@Field("nom") String nom);

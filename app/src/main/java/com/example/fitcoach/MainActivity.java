@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         if (appDataManager != null && !appDataManager.isCompleted(appDataManager.getCompteId())) {
             Intent intent = new Intent(this, loginActivity.class);
             startActivity(intent);
-            finish(); // Pour éviter le retour en arrière sur MainActivity
+            finish();
             return;
         }
 
@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         BottomNavigationView navView = findViewById(R.id.nav_view);
 
-        // Vérifier et demander la permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED) {
             if(!isServiceStarted){
                 startStepCounterService();
@@ -65,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, ACTIVITY_RECOGNITION_REQUEST_CODE);
         }
-        //Request permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
         } else {
@@ -138,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.app_bar_menu, menu); // Tu peux y ajouter le bouton "Paramètres"
+        getMenuInflater().inflate(R.menu.app_bar_menu, menu);
         return true;
     }
 

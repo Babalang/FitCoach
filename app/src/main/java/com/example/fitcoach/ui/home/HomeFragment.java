@@ -44,10 +44,8 @@ public class HomeFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: called");
 
-        // ViewModel
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
-        // View Binding
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
@@ -65,10 +63,9 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        int currentSteps = appDataManager.getSteps(0);  // Obtenir les pas depuis AppDataManager
-        homeViewModel.setStepCount(currentSteps); // Initialiser le ViewModel avec les données sauvegardées
+        int currentSteps = appDataManager.getSteps(0);
+        homeViewModel.setStepCount(currentSteps);
 
-        // Observe ViewModel
         homeViewModel.getStepCount().observe(getViewLifecycleOwner(), stepCount -> {
             if (binding != null) {
                 binding.circularGauge.setValue(stepCount);

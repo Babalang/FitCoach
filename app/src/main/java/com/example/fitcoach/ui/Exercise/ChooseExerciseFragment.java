@@ -40,7 +40,7 @@ public class ChooseExerciseFragment extends Fragment {
     private String[] sports;
     private String[] sportsTimer;
     private int[] sportImages = {
-            R.drawable.appli_icon,         // Assure-toi d’avoir ces ressources
+            R.drawable.appli_icon,
             R.drawable.walking,
             R.drawable.bike,
             R.drawable.appli_icon
@@ -62,7 +62,6 @@ public class ChooseExerciseFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_choose_exercise, container, false);
 
-        // Initialisation
         sportSpinner = view.findViewById(R.id.sport_spinner);
         sportImage = view.findViewById(R.id.sport_image);
         startButton = view.findViewById(R.id.start_exercise_button);
@@ -89,7 +88,6 @@ public class ChooseExerciseFragment extends Fragment {
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 sportSpinner.setAdapter(adapter);
 
-                // Image change en fonction du choix
                 sportSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -119,7 +117,6 @@ public class ChooseExerciseFragment extends Fragment {
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 sportSpinner.setAdapter(adapter);
 
-                // Image change en fonction du choix
                 sportSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -135,7 +132,6 @@ public class ChooseExerciseFragment extends Fragment {
             }
         });
 
-        // Bouton démarrer
         startButton.setOnClickListener(v -> {
             String selectedSport = (String) sportSpinner.getSelectedItem();
             int checkedId = group.getCheckedRadioButtonId();

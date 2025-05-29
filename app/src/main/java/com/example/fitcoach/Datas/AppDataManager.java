@@ -98,12 +98,11 @@ public class AppDataManager {
         dHelper = new DataBaseHelper(context);
         db = dHelper.getWritableDatabase();
 
-        // Vérifie si la table stepcounter est vide
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_STEPCOUNTER, null);
         if (cursor.moveToFirst()) {
             int count = cursor.getInt(0);
             if (count == 0) {
-                insertStepCounter("", 0,0,0,0); // Insère seulement si aucune ligne n'existe
+                insertStepCounter("", 0,0,0,0);
             }
         }
         cursor.close();
@@ -165,7 +164,7 @@ public class AppDataManager {
 
     public void insertStepCounter(String date, int steps, int baseSteps, float calories, float distance) {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_ID, 0); // Ajoute ceci !
+        values.put(COLUMN_ID, 0);
         values.put(COLUMN_LAST_RESET_DATE, date);
         values.put(COLUMN_STEPS, steps);
         values.put(COLUMN_BASE_STEPS, baseSteps);
@@ -249,10 +248,9 @@ public class AppDataManager {
         SQLiteDatabase db = null;
         try {
             db = dHelper.getWritableDatabase();
-            // Suite du code
         } catch (Exception e) {
             Log.e("AppDataManager", "Erreur d'accès à la base de données", e);
-            return 0; // Valeur par défaut
+            return 0;
         }
         String query = "SELECT " + COLUMN_CALORIES + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
@@ -355,7 +353,6 @@ public class AppDataManager {
         private int stepsObjective;
         private int caloriesObjective;
 
-        // Constructeur
         public Compte(int id, String login, String email, String telephone, int age,int poids, int taille, String sexe, boolean isCompleted, int stepsObjective, int caloriesObjective) {
             this.id = id;
             this.login = login;
@@ -370,7 +367,6 @@ public class AppDataManager {
             this.caloriesObjective = caloriesObjective;
         }
 
-        // Getters
         public int getId() { return id; }
         public String getLogin() { return login; }
         public String getEmail() { return email; }
@@ -402,7 +398,6 @@ public class AppDataManager {
             int stepsObjectiveIndex = cursor.getColumnIndexOrThrow(COLUMN_STEPS_OBJECTIVE);
             int caloriesObjectiveIndex = cursor.getColumnIndexOrThrow(COLUMN_CALORIES_OBJECTIVE);
 
-            // Crée un objet Compte avec les données récupérées
             compte = new Compte(
                     cursor.getInt(idIndex),
                     cursor.getString(loginIndex),

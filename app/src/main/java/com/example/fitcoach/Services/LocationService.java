@@ -132,7 +132,7 @@ public class LocationService extends Service {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setContentTitle("Location Service")
                 .setContentText("Tracking your location")
-                .setSmallIcon(R.drawable.appli_icon); // Replace with your icon
+                .setSmallIcon(R.drawable.appli_icon);
         return builder.build();
     }
 }

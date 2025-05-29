@@ -50,7 +50,6 @@
         public static final String ACTION_REQUEST_STATUS = "com.example.fitcoach.ACTION_REQUEST_STATUS";
         public static final String ACTION_SEND_STATUS = "com.example.fitcoach.ACTION_SEND_STATUS";
 
-    // Dans onStartCommand
 
         private boolean isRunning = false;
         private long startTimeMillis = 0;
@@ -74,7 +73,7 @@
             public void run() {
                 if (isRunning) {
                     startSendingUIUpdates();
-                    uiHandler.postDelayed(this, 100); // chaque 1 sec
+                    uiHandler.postDelayed(this, 100);
                 }
             }
         };
@@ -101,7 +100,6 @@
                     Log.d("InexerciseFragment", "onReceive: Incrementing step, current repetition: " + repetition);
                 } else if (ACTION_REQUEST_STATUS.equals(intent.getAction())) {
                     Intent statusIntent = new Intent(ACTION_SEND_STATUS);
-                    // Remplis avec les données en cours
                     statusIntent.putExtra("steps", totalSteps - initialSteps);
                     statusIntent.putExtra("duration", getElapsedExerciseTimeMillis()/1000);
                     statusIntent.putExtra("calories", currentCalories);
@@ -109,7 +107,7 @@
                     statusIntent.putExtra("speed", speed);
                     statusIntent.putExtra("isRunning", isRunning);
                     statusIntent.putExtra("sportType", sportType);
-                    statusIntent.putExtra("isChronoMode", isChronoMode);  // Ajouter cette info
+                    statusIntent.putExtra("isChronoMode", isChronoMode);
                     statusIntent.putExtra("repetition", repetition);
                     localBroadcastManager.sendBroadcast(statusIntent);
                 }
@@ -216,7 +214,6 @@
             return START_STICKY;
         }
 
-        // Démarre un exercice
         public void startExercise(String sport, boolean isChronoMode) {
             this.isChronoMode = isChronoMode;
             sportType = (sport != null) ? sport : "marche";
@@ -229,13 +226,12 @@
             startSendingUIUpdates();
             if (isRunning) {
                 uiHandler.removeCallbacks(uiRunnable);
-                uiHandler.post(uiRunnable); // immediate
+                uiHandler.post(uiRunnable);
             }
             Toast.makeText(this, "Exercice démarré", Toast.LENGTH_SHORT).show();
             Log.d("ExerciseService", "Exercice démarré ; sport : " + sportType);
         }
 
-        // Met en pause l'exercice
         public void pauseExercise() {
             isRunning = false;
             if (locationManager != null && locationListener != null) {
@@ -248,7 +244,7 @@
 
             Intent intent = new Intent(ACTION_UPDATE_UI);
             intent.putExtra("isPaused", true);
-            intent.putExtra("forceUpdateUI", true); // Indicateur de mise à jour forcée
+            intent.putExtra("forceUpdateUI", true);
             intent.putExtra("steps", totalSteps - initialSteps);
             intent.putExtra("duration", getElapsedExerciseTimeMillis()/1000);
             intent.putExtra("calories", currentCalories);
@@ -271,7 +267,6 @@
             uiHandler.removeCallbacks(uiRunnable);
         }
 
-        // Reprend l'exercice
         public void resumeExercise() {
             startTimeMillis = SystemClock.elapsedRealtime();
             isRunning = true;
@@ -294,7 +289,6 @@
             localBroadcastManager.sendBroadcast(intent);
         }
 
-        // Arrête l'exercice
         public void stopExercise() {
             isRunning = false;
             if (locationManager != null && locationListener != null) {
@@ -354,7 +348,6 @@
             }
         }
 
-        // Mise à jour des données de localisation (distance et vitesse)
         private void startLocationUpdates() {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -366,7 +359,6 @@
             estimateDistance();
         }
 
-        // Estimation des calories brûlées en fonction du type de sport
         private float estimateCalories(String sport, float distanceMeters) {
             float km = distanceMeters;
             switch (sport.toLowerCase()) {
@@ -377,17 +369,15 @@
             }
         }
 
-        // Estimation de la distance parcourue
         private float estimateDistance() {
             if(sportType != "marche" && gpsTrack.size() >= 2) {
                 distance = 0;
                 for (int i = 1; i < gpsTrack.size(); i++) {
                     Location previousLocation = gpsTrack.get(i - 1);
                     Location currentLocation = gpsTrack.get(i);
-                    distance += previousLocation.distanceTo(currentLocation); // distance en mètres
+                    distance += previousLocation.distanceTo(currentLocation);
                 }
 
-                // Calcul de la vitesse seulement si nous avons au moins 2 points
                 Location lastLocation = gpsTrack.get(gpsTrack.size() - 1);
                 Location secondLastLocation = gpsTrack.get(gpsTrack.size() - 2);
                 long timeDelta = lastLocation.getTime() - secondLastLocation.getTime();
@@ -395,24 +385,21 @@
                     speed = (distance / (timeDelta / 1000f)) * 3.6f;
                 }
             } else {
-                // Mode pas à pas ou pas assez de points GPS
                 distance = 0;
                 int stepCount = totalSteps - initialSteps;
                 distance = stepCount * 0.7f;
 
-                // Dans ce cas la vitesse est calculée par rapport au temps écoulé
                 long elapsedSeconds = getElapsedExerciseTimeMillis() / 1000;
                 if (elapsedSeconds > 0) {
-                    speed = (distance / elapsedSeconds) * 3.6f;  // km/h
+                    speed = (distance / elapsedSeconds) * 3.6f;
                 }
             }
 
-            distance = distance / 1000f;  // Convertir en km
+            distance = distance / 1000f;
             return distance;
         }
 
 
-        // Création de la notification avec l'info mise à jour
         private Notification createNotification(String content) {
             Intent notificationIntent = new Intent(this, MainActivity.class);
             notificationIntent.setAction(Intent.ACTION_MAIN);
@@ -467,7 +454,6 @@
         }
 
 
-        // Méthode appelée lorsque le service est détruit
         @Override
         public void onDestroy() {
             super.onDestroy();
@@ -481,7 +467,6 @@
             Log.d("ExerciseService", "Exercice terminé, duration : "+totalDurationMillis+" repetitions : "+repetition+" steps : "+(totalSteps-initialSteps)+" calories : "+currentCalories+" distance : "+distance+" speed : "+speed+"");
         }
 
-        // Méthode pour lier le service à un client
         @Override
         public IBinder onBind(Intent intent) {return null;}
 

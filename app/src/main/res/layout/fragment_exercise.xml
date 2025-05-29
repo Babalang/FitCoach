@@ -6,12 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".ui.Exercise.ExerciseFragment">
 
-    <!-- 🌍 FrameLayout pour superposer la carte et les boutons -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- 🌍 Carte OSMDroid (en bas) -->
         <org.osmdroid.views.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"

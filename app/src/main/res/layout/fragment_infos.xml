@@ -22,7 +22,6 @@
             android:orientation="vertical"
             android:padding="8dp">
 
-            <!-- Informations personnelles -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -31,7 +30,6 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp" />
 
-            <!-- Login -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -42,7 +40,6 @@
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Email -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -55,7 +52,6 @@
                     android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Téléphone -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -68,7 +64,6 @@
                     android:inputType="phone" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Âge -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -81,7 +76,6 @@
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Poids -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -94,7 +88,6 @@
                     android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Taille -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -107,7 +100,6 @@
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Sexe -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -134,7 +126,6 @@
                     android:text="Femme" />
             </RadioGroup>
 
-            <!-- Objectifs -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -144,7 +135,6 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp" />
 
-            <!-- Objectif de pas -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -156,7 +146,6 @@
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Objectif de calories -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -172,7 +161,6 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bouton Enregistrer -->
     <Button
         android:id="@+id/save_button"
         android:layout_width="0dp"

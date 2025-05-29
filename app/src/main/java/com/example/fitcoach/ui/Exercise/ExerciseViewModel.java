@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 public class ExerciseViewModel extends ViewModel {
 
-    // LiveData pour contenir et observer les données de l'exercice
     private final MutableLiveData<ArrayList<ExerciseStep>> _steps = new MutableLiveData<>();
     public LiveData<ArrayList<ExerciseStep>> getSteps() {
         return _steps;
@@ -32,7 +31,7 @@ public class ExerciseViewModel extends ViewModel {
     private final MutableLiveData<Long> _duration = new MutableLiveData<>();
     public LiveData<Long> getDuration() {
         return _duration;
-    } // Durée en millisecondes
+    }
 
     private final MutableLiveData<Float> _calories = new MutableLiveData<>();
     public LiveData<Float> getCalories() {
@@ -67,7 +66,6 @@ public class ExerciseViewModel extends ViewModel {
         _isPaused.setValue(isPaused);
     }
 
-    // Méthodes pour mettre à jour le LiveData depuis le fragment
 
     public void setSteps(ArrayList<ExerciseStep> stepList) {
         _steps.setValue(stepList);
@@ -118,19 +116,12 @@ public class ExerciseViewModel extends ViewModel {
         }
     }
 
-    // Vous pourriez également vouloir exposer des méthodes pour réinitialiser les données
-    // lorsqu'un nouvel exercice démarre
     public void resetExerciseData() {
         _steps.setValue(new ArrayList<>());
         _distance.setValue(0.0f);
         _speed.setValue(0.0f);
         _duration.setValue(0L);
         _calories.setValue(0.0f);
-        // Gardez sportType et isChronoMode tels qu'ils sont définis une fois par session d'exercice
     }
 
-    // Ajoutez LiveData et méthodes pour le mode Timer si applicable
-    // private final MutableLiveData<TimerStepData> _timerStepData = new MutableLiveData<>(); // Créez une classe de données pour les infos d'étape du minuteur
-    // public LiveData<TimerStepData> getTimerStepData() { return _timerStepData; }
-    // public void setTimerStepData(TimerStepData data) { _timerStepData.setValue(data); }
 }

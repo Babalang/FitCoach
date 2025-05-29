@@ -36,7 +36,6 @@ public class loginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         appDataManager = AppDataManager.getInstance(getContext());
-        // Inflate the layout for this fragment
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_infos, container, false);
         setHasOptionsMenu(true);
@@ -83,7 +82,6 @@ public class loginFragment extends Fragment {
                     sexe = "Femme";
                 }
                 appDataManager.updateCompte(id,login.getText().toString(), email.getText().toString(), phone.getText().toString(), Integer.parseInt(age.getText().toString()), sexe, Integer.parseInt(stepGoal.getText().toString()), Integer.parseInt(calorieGoal.getText().toString()), Integer.parseInt(size.getText().toString()), Float.parseFloat(weight.getText().toString()));
-                // Naviguer vers le fragment suivant avec les coordonnées
                 NavController navController = NavHostFragment.findNavController(this);
                 navController.navigate(R.id.infos_to_home);
             } else {
@@ -96,7 +94,6 @@ public class loginFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            // Action de retour personnalisée (ou juste revenir)
             NavHostFragment.findNavController(this)
                     .navigate(R.id.infos_to_home);
             return true;

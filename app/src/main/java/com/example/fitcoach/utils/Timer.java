@@ -24,8 +24,8 @@ public class Timer extends View {
 
     private boolean isRunning = false;
     private boolean isCountdown = false;
-    private long totalTime = 0;      // En secondes pour le compte à rebours
-    private long elapsedTime = 0;    // En secondes pour le chrono ou timer restant
+    private long totalTime = 0;
+    private long elapsedTime = 0;
 
     private final Handler handler = new Handler();
     private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -145,10 +145,8 @@ public class Timer extends View {
 
         rect.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
 
-        // Fond gris
         canvas.drawArc(rect, 0, 360, false, backgroundPaint);
 
-        // Progression
         float sweepAngle;
         if (isCountdown && totalTime > 0) {
             sweepAngle = 360f * (1f - ((float) elapsedTime / totalTime));
@@ -156,7 +154,6 @@ public class Timer extends View {
             sweepAngle = 360f * ((elapsedTime % 60f) / 60f);
         }
 
-        // Dégradé
         SweepGradient sweepGradient = new SweepGradient(
                 centerX,
                 centerY,
@@ -168,7 +165,6 @@ public class Timer extends View {
         sweepGradient.setLocalMatrix(gradientMatrix);
         progressPaint.setShader(sweepGradient);
 
-        // Dessin
         canvas.drawArc(rect, -90, sweepAngle, false, progressPaint);
         canvas.drawText(getElapsedTime(), centerX, centerY + 20f, textPaint);
     }

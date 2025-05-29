@@ -136,14 +136,11 @@ public class InExerciseFragment extends Fragment {
         Button nextStepButton = view.findViewById(R.id.btn_next_step);
         Button restartButton = view.findViewById(R.id.btn_restart);
 
-        // Observer pour les changements d'étapes
         viewModel.getCurrentStepIndex().observe(getViewLifecycleOwner(), index -> {
             ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
             if (current_step_value != null && steps != null && index < steps.size()) {
-                // Mettre à jour le texte de l'étape actuelle
                 current_step_value.setText(steps.get(index).getName());
 
-                // Mettre à jour le texte de la prochaine étape
                 if (next_step_value != null) {
                     if (index + 1 < steps.size()) {
                         next_step_value.setText(steps.get(index + 1).getName());
@@ -152,7 +149,6 @@ public class InExerciseFragment extends Fragment {
                     }
                 }
 
-                // Configurer le timer avec la durée de l'étape actuelle
                 if (timer != null) {
                     timer.setCountdown(steps.get(index).getDuration());
                     timer.reset();
@@ -161,27 +157,22 @@ public class InExerciseFragment extends Fragment {
             }
         });
 
-        // Définir le comportement quand le timer termine
         timer.setTimerListener(() -> {
             ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
             Integer currentIndex = viewModel.getCurrentStepIndex().getValue();
 
             if (steps != null && currentIndex != null && currentIndex + 1 < steps.size()) {
-                // Passer à l'étape suivante
                 localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
 
             } else {
-                // Afficher dialogue de fin d'exercice
                 new AlertDialog.Builder(requireContext())
                         .setTitle("Exercice terminé")
                         .setMessage("Veux-tu recommencer ?")
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            // Recommencer l'exercice
                             localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
                             timer.start();
                         })
                         .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                            // Terminer l'exercice
                             localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
                             timer.stop();
                         })
@@ -190,7 +181,6 @@ public class InExerciseFragment extends Fragment {
             }
         });
 
-        // Configuration du bouton pause
         pauseButton.setOnClickListener(v -> {
             if (timer.isRunning()) {
                 timer.stop();
@@ -205,7 +195,6 @@ public class InExerciseFragment extends Fragment {
             }
         });
 
-        // Configuration du bouton stop
         stopButton.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle("Arrêter l'exercice")
@@ -218,7 +207,6 @@ public class InExerciseFragment extends Fragment {
                     .show();
         });
 
-        // Configuration du bouton étape suivante
         nextStepButton.setOnClickListener(v -> {
             if(viewModel.getCurrentStepIndex().getValue() + 1 < viewModel.getSteps().getValue().size()) {
                 localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
@@ -227,12 +215,10 @@ public class InExerciseFragment extends Fragment {
                         .setTitle("Exercice terminé")
                         .setMessage("Veux-tu recommencer ?")
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            // Recommencer l'exercice
                             localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
                             timer.start();
                         })
                         .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                            // Terminer l'exercice
                             localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
                             timer.stop();
                         })
@@ -242,16 +228,13 @@ public class InExerciseFragment extends Fragment {
             Log.d("InExerciseFragment", "nextStepButton clicked");
         });
 
-        // Configuration du bouton redémarrer
         restartButton.setOnClickListener(v -> {
             timer.reset();
             timer.start();
         });
 
-        // Initialiser avec la première étape
         viewModel.setCurrentStepIndex(0);
 
-        // Démarrer le timer
         ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
         if (steps != null && !steps.isEmpty()) {
             timer.setCountdown(steps.get(0).getDuration());
@@ -278,10 +261,8 @@ public class InExerciseFragment extends Fragment {
     public void onStart() {
         super.onStart();
         registerReceiver();
-        // Demande l'état au service (s'il est actif il répondra)
         localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_REQUEST_STATUS));
 
-        // Lance un timer pour savoir s’il a répondu dans les 500ms
         new Handler().postDelayed(() -> {
             if (!isServiceBound) {
                 if (getArguments() != null && getArguments().containsKey("selected_sport")) {
@@ -293,7 +274,7 @@ public class InExerciseFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        unregisterReceiver(); // clean
+        unregisterReceiver();
     }
 
 
@@ -309,7 +290,6 @@ public class InExerciseFragment extends Fragment {
     private class ExerciseFragmentReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Vérifier que l'intent contient les bonnes données
             if (intent != null) {
                 if (ExerciseService.ACTION_SEND_STATUS.equals(intent.getAction())) {
                     isServiceBound = true;

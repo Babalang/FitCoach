@@ -45,10 +45,8 @@ public class StepCounterService extends Service implements SensorEventListener {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         Log.d("StepCounterService", "onCreate: service created");
-        // Initialiser AppDataManager
         appDataManager = AppDataManager.getInstance(getApplicationContext());
 
-        // Récupérer les données existantes depuis AppDataManager
         currentSteps = appDataManager.getSteps(0);
     }
 
@@ -68,10 +66,10 @@ public class StepCounterService extends Service implements SensorEventListener {
             Notification notification = new Notification.Builder(this, "step_counter_channel")
                     .setContentTitle("FitCoach")
                     .setContentText("Le suivi des pas est actif")
-                    .setSmallIcon(R.drawable.appli_icon) // Remplace par ton icône custom si dispo
+                    .setSmallIcon(R.drawable.appli_icon)
                     .build();
 
-            startForeground(1, notification); // OBLIGATOIRE sur Android 10+
+            startForeground(1, notification);
         }
 
         if (stepCounterSensor == null) {
@@ -82,7 +80,7 @@ public class StepCounterService extends Service implements SensorEventListener {
 
         sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-        return START_STICKY; // Maintient le service actif
+        return START_STICKY;
     }
 
 
@@ -105,7 +103,7 @@ public class StepCounterService extends Service implements SensorEventListener {
             currentSteps = totalSteps - baseSteps;
             AppDataManager.Compte compte = appDataManager.getCompteById(appDataManager.getCompteId());
             float stepLength = estimateStepLength(compte.getTaille(), false);
-            float DISTANCE = (currentSteps * stepLength) / 100000f; // en km
+            float DISTANCE = (currentSteps * stepLength) / 100000f;
             float CALORIES = compte.getPoids() * DISTANCE * METRIC_WALKING_FACTOR;
             appDataManager.updateStepCounter(0, today, currentSteps, baseSteps, CALORIES, DISTANCE);
 
@@ -141,7 +139,6 @@ public class StepCounterService extends Service implements SensorEventListener {
     }
 
     private void updateWidget(){
-        // Mise à jour du widget avec la nouvelle valeur
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         ComponentName componentName = new ComponentName(this, StepWidgetProvider.class);
 

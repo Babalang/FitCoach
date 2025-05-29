@@ -91,7 +91,6 @@ public class ExerciseFragment extends Fragment {
             serviceCheckReceiver = new ServiceCheckReceiver();
         }
 
-        // Enregistrer le récepteur pour obtenir la réponse du service
         if (!isReceiverRegistered) {
             IntentFilter filter = new IntentFilter(ExerciseService.ACTION_SEND_STATUS);
             localBroadcastManager.registerReceiver(serviceCheckReceiver, filter);
@@ -99,7 +98,6 @@ public class ExerciseFragment extends Fragment {
             Log.d(TAG, "Récepteur enregistré pour vérifier le statut du service");
         }
 
-        // Envoyer une demande de statut
         Intent statusRequest = new Intent(ExerciseService.ACTION_REQUEST_STATUS);
         localBroadcastManager.sendBroadcast(statusRequest);
         Log.d(TAG, "Demande de statut envoyée au service");
@@ -131,7 +129,6 @@ public class ExerciseFragment extends Fragment {
 
                 Log.d(TAG, "Réponse du service reçue - sport: " + currentSportType + ", isRunning: " + isRunning);
 
-                // Si service est en cours, naviguer directement vers InExerciseFragment
                 if (isServiceActive) {
                     currentExerciseType = (intent.getBooleanExtra("isChronoMode", true)) ? "chrono" : "timer";
                     navigateToInExercise();
@@ -228,7 +225,7 @@ public class ExerciseFragment extends Fragment {
     private void updatePositionMarker(GeoPoint geoPoint) {
         if (myPositionMarker != null) {
             myPositionMarker.setPosition(geoPoint);
-            map.invalidate(); // Refresh the map to show the updated marker
+            map.invalidate();
         }
     }
     private void getLastLocation() {
@@ -242,7 +239,6 @@ public class ExerciseFragment extends Fragment {
                 .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             lastKnownLocation = location;
                             Log.d(TAG, "getLastLocation: position found");

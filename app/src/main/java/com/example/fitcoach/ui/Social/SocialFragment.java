@@ -29,52 +29,12 @@ import retrofit2.Response;
 public class SocialFragment extends Fragment {
 
     private static final String TAG = "SocialFragment";
-    private FragmentSocialBinding binding;
     private TextView id;
     private TextView score;
     private TextView Textami;
     private String scoreAmi;
     private Button boutonAjouteAmi;
     private EditText texteAjoutAmi;
-
-
-    private void fetchAllUsers() {
-        ApiService apiService = RetrofitClient.getInstance();
-        Call<List<User>> call = apiService.getUsers();
-
-        call.enqueue(new Callback<List<User>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<User>> call, @NonNull Response<List<User>> response) {
-                if (response.isSuccessful()) {
-                    List<User> userList = response.body();
-                    if (userList != null && !userList.isEmpty()) {
-                        Log.d(TAG, "Utilisateurs récupérés: " + userList.size());
-                        for (User user : userList) {
-                            Log.d(TAG, "User: " + user.getNom());
-                            id.setText(user.getNom());
-                            score.setText(user.getScore());
-                        }
-                    } else {
-                        Log.e(TAG, "Réponse réussie mais corps vide ou liste vide pour getUsers");
-                    }
-                } else {
-                    Log.e(TAG, "Erreur getUsers (code " + response.code() + "): " + response.message());
-                    if (response.errorBody() != null) {
-                        try {
-                            Log.e(TAG, "Corps de l'erreur: " + response.errorBody().string());
-                        } catch (IOException e) {
-                            Log.e(TAG, "Erreur lors de la lecture du corps de l'erreur", e);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<User>> call, @NonNull Throwable t) {
-                Log.e(TAG, "Échec de l'appel getUsers: " + t.getMessage(), t);
-            }
-        });
-    }
 
     private void fetchUserById(String userId) {
         ApiService apiService = RetrofitClient.getInstance();
@@ -159,22 +119,15 @@ public class SocialFragment extends Fragment {
         AppDataManager.Compte compte = appDataManager.getCompteById(ide);
         id=view.findViewById(R.id.id);
         score=view.findViewById(R.id.score);
+        id.setText(compte.getLogin());
+        score.setText("0");
         Textami=view.findViewById(R.id.listeAmi);
         boutonAjouteAmi=view.findViewById(R.id.BoutonAjoutAmi);
         texteAjoutAmi=view.findViewById(R.id.TexteAjoutAmi);
         boutonAjouteAmi.setOnClickListener(v->{
             ajouterAmi(compte.getLogin(),texteAjoutAmi.getText().toString());
         });
-
-        //fetchAllUsers();
-
         fetchUserById(compte.getLogin());
         return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
     }
 }
