@@ -38,7 +38,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
         public void bind(Exercise exercise, OnItemClickListener listener) {
             dateText.setText("📅 " + exercise.getDate());
-            sportText.setText("🏃 " + exercise.getSport() + " - " + exercise.getDuration() + " min");
+            sportText.setText("🏃 " + exercise.getSport() + " - " + (exercise.getDuration()/60) + " min " + (exercise.getDuration()%60) + " sec");
             stepsText.setText("👣 " + exercise.getSteps() + " pas");
             itemView.setOnClickListener(v -> listener.onItemClick(exercise));
         }

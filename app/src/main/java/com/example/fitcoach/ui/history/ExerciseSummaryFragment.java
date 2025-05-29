@@ -1,20 +1,15 @@
 package com.example.fitcoach.ui.history;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
-
 import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.R;
 import com.example.fitcoach.databinding.FragmentExerciseSummaryBinding;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -24,7 +19,6 @@ public class ExerciseSummaryFragment extends Fragment {
     private FragmentExerciseSummaryBinding binding;
     private boolean exerciseSaved = false;
 
-    // Variables pour stocker les données de l'exercice
     private String sportType;
     private long duration;
     private int steps;
@@ -44,7 +38,6 @@ public class ExerciseSummaryFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Récupérer les données de l'exercice
         if (getArguments() != null) {
 
             if(getArguments().getSerializable("exercise") == null) {
@@ -96,21 +89,18 @@ public class ExerciseSummaryFragment extends Fragment {
             }
         }
 
-        // Bouton pour sauvegarder dans l'historique
         binding.btnSaveToHistory.setOnClickListener(v -> {
             if (!exerciseSaved) {
                 saveExerciseToHistory();
                 exerciseSaved = true;
                 binding.btnSaveToHistory.setText("Enregistré ✓");
                 binding.btnSaveToHistory.setEnabled(false);
-                Toast.makeText(requireContext(), "Exercice enregistré dans l'historique", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Bouton pour retourner à l'accueil
         binding.btnBackToHome.setOnClickListener(v -> {
             NavController navController = NavHostFragment.findNavController(this);
-            navController.navigate(R.id.summary_to_history);
+            navController.navigate(R.id.action_summary_to_history);
         });
     }
 
@@ -121,15 +111,9 @@ public class ExerciseSummaryFragment extends Fragment {
     }
 
     private void saveExerciseToHistory() {
-        // Obtenir la date actuelle au format souhaité
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String currentDate = sdf.format(new Date());
-
-        // Récupérer l'instance de AppDataManager
         AppDataManager dataManager = AppDataManager.getInstance(requireContext());
-
-        // Enregistrer l'exercice dans l'historique
-        // Conversion des calories en int car la méthode insertHistorique attend un int
         dataManager.insertHistorique(currentDate, sportType, (int) calories, steps, distance, duration, repetition, speed);
     }
 

@@ -17,8 +17,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
-
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.fitcoach.Datas.AppDataManager;
@@ -73,7 +71,6 @@ public class StepCounterService extends Service implements SensorEventListener {
         }
 
         if (stepCounterSensor == null) {
-            Toast.makeText(this, "Pas de capteur de pas détecté", Toast.LENGTH_SHORT).show();
             Log.e("StepCounterService", "Sensor not available");
             return START_NOT_STICKY;
         }
@@ -97,7 +94,6 @@ public class StepCounterService extends Service implements SensorEventListener {
 
             if (!today.equals(lastResetDate) || baseSteps == -1) {
                 baseSteps = totalSteps;
-                Toast.makeText(this, "Reset effectué", Toast.LENGTH_SHORT).show();
                 appDataManager.updateStepCounter(0, today, 0,baseSteps,0f, 0f);
             }
             currentSteps = totalSteps - baseSteps;
@@ -131,6 +127,7 @@ public class StepCounterService extends Service implements SensorEventListener {
         Intent intent = new Intent(ACTION_STEP_COUNT_UPDATE);
         intent.putExtra(EXTRA_STEP_COUNT, currentSteps);
         intent.putExtra("calories", appDataManager.getCalories(0));
+        Log.d("StepCounterService", "sendStepCountUpdate: calories updated to " + appDataManager.getCalories(0));
         intent.putExtra("distance", appDataManager.getDistance(0));
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         Log.d("StepCounterService", "sendStepCountUpdate: step count updated");

@@ -4,13 +4,10 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -19,8 +16,6 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
-import com.example.fitcoach.Services.ExerciseService;
 import com.example.fitcoach.Services.LocationService;
 import com.example.fitcoach.Services.StepCounterService;
 import com.example.fitcoach.databinding.ActivityMainBinding;
@@ -74,11 +69,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_social, R.id.navigation_history, R.id.navigation_music, R.id.navigation_exercise)
+                R.id.navigation_home, R.id.navigation_social, R.id.navigation_history, R.id.navigation_exercise)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+        if(getIntent().getBooleanExtra("OPEN_EXERCISE", false)){
+            navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.action_home_to_exercise);
+        }
     }
 
     private void startStepCounterService() {
@@ -108,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else {
                 Log.e(TAG, "Permission ACTIVITY_RECOGNITION refusée");
-                Toast.makeText(this, "Permission refusée", Toast.LENGTH_SHORT).show();
             }
         }
         if (requestCode == LOCATION_REQUEST_CODE) {
@@ -121,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
 
             } else {
                 Log.e(TAG, "onRequestPermissionsResult: Permission ACCESS_FINE_LOCATION refusée");
-                Toast.makeText(this, "Permission refusée", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -155,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         if(intent != null && intent.getBooleanExtra("OPEN_EXERCISE", false)){
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-            navController.navigate(R.id.in_exercise);
+            navController.navigate(R.id.navigation_in_exercise);
         }
     }
 

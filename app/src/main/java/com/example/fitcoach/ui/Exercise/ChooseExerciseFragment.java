@@ -107,7 +107,6 @@ public class ChooseExerciseFragment extends Fragment {
                 //    timerSteps.add(new ExerciseStep("Nouvelle étape", 30));
                 //    adapter.notifyItemInserted(timerSteps.size() - 1);
                 //});
-
                 sportImage.setVisibility(View.VISIBLE);
                 sportSpinner.setVisibility(View.VISIBLE);
                 startButton.setVisibility(View.VISIBLE);
@@ -146,7 +145,7 @@ public class ChooseExerciseFragment extends Fragment {
             bundle.putSerializable("timer_steps", stepsToSend);
             Log.d("ChooseExerciseFragment", "ExerciseService started, isChrono: " + isChrono + ", stepsToSend: " + stepsToSend.size() + ", selectedSport: " + selectedSport + ", exerciseType: " + exerciseType);
 
-            Navigation.findNavController(v).navigate(R.id.choose_to_inexercise, bundle);
+            Navigation.findNavController(v).navigate(R.id.action_choose_to_inexercise, bundle);
         });
 
         return view;

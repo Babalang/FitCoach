@@ -83,9 +83,7 @@ public class loginFragment extends Fragment {
                 }
                 appDataManager.updateCompte(id,login.getText().toString(), email.getText().toString(), phone.getText().toString(), Integer.parseInt(age.getText().toString()), sexe, Integer.parseInt(stepGoal.getText().toString()), Integer.parseInt(calorieGoal.getText().toString()), Integer.parseInt(size.getText().toString()), Float.parseFloat(weight.getText().toString()));
                 NavController navController = NavHostFragment.findNavController(this);
-                navController.navigate(R.id.infos_to_home);
-            } else {
-                Toast.makeText(requireContext(), "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show();
+                navController.navigate(R.id.action_infos_to_home);
             }
         });
         return view;
@@ -95,7 +93,7 @@ public class loginFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             NavHostFragment.findNavController(this)
-                    .navigate(R.id.infos_to_home);
+                    .navigate(R.id.action_infos_to_home);
             return true;
         }
         return super.onOptionsItemSelected(item);

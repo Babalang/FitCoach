@@ -10,22 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
 import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.MainActivity;
 import com.example.fitcoach.R;
 import com.example.fitcoach.Services.StepCounterService;
 import com.example.fitcoach.databinding.FragmentHomeBinding;
 import com.example.fitcoach.ui.history.Exercise;
-import com.example.fitcoach.ui.history.HistoryFragment;
 import androidx.navigation.fragment.NavHostFragment;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -91,7 +85,7 @@ public class HomeFragment extends Fragment {
                 String formattedDate = outputFormat.format(inputFormat.parse(lastEntry.getDate()));
                 tvLastDate.setText(formattedDate);
             } catch (Exception e) {
-                tvLastDate.setText(lastEntry.getDate()); // fallback en cas d'erreur
+                tvLastDate.setText(lastEntry.getDate());
             }
         } else {
             tvLastSport.setText("Aucun");
@@ -153,8 +147,6 @@ public class HomeFragment extends Fragment {
         if (isReceiverRegistered) {
             localBroadcastManager.unregisterReceiver(stepCountReceiver);
             isReceiverRegistered = false;
-        } else {
-            Toast.makeText(requireContext(), "Receiver not registered", Toast.LENGTH_SHORT).show();
         }
     }
 

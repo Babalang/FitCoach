@@ -170,10 +170,10 @@ public class AppDataManager {
         values.put(COLUMN_CALORIES, calories);
         values.put(COLUMN_STEPS, steps);
         values.put(COLUMN_DISTANCE, distance);
-        values.put(COLUMN_BASE_STEPS, steps); // Ajoute les pas de base
-        values.put(COLUMN_DURATION, duration); // Ajoute une durée par défaut
-        values.put(COLUMN_REPETITION, repetition); // Ajoute une répétition par défaut
-        values.put(COLUMN_SPEED, speed); // Ajoute une vitesse par défaut
+        values.put(COLUMN_BASE_STEPS, steps);
+        values.put(COLUMN_DURATION, duration);
+        values.put(COLUMN_REPETITION, repetition);
+        values.put(COLUMN_SPEED, speed);
         db.insert(TABLE_HISTORIQUE, null, values);
     }
 
@@ -216,10 +216,10 @@ public class AppDataManager {
         values.put(COLUMN_CALORIES, calories);
         values.put(COLUMN_STEPS, steps);
         values.put(COLUMN_DISTANCE, distance);
-        values.put(COLUMN_BASE_STEPS, steps); // Met à jour les pas de base
-        values.put(COLUMN_DURATION, duration); // Met à jour la durée par défaut
-        values.put(COLUMN_REPETITION, repetition); // Met à jour la répétition par défaut
-        values.put(COLUMN_SPEED, speed); // Met à jour la vitesse par défaut
+        values.put(COLUMN_BASE_STEPS, steps);
+        values.put(COLUMN_DURATION, duration);
+        values.put(COLUMN_REPETITION, repetition);
+        values.put(COLUMN_SPEED, speed);
         db.update(TABLE_HISTORIQUE, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
     }
     public void updateStepCounter(int id, String date, int steps, int baseSteps, float calories, float distance) {
@@ -403,6 +403,18 @@ public class AppDataManager {
         }
         cursor.close();
         return lastExercise;
+    }
+
+    public int getAllCalories(){
+        String query = "SELECT SUM(" + COLUMN_CALORIES + ") FROM " + TABLE_HISTORIQUE;
+        Cursor cursor = db.rawQuery(query, null);
+        int totalCalories = 0;
+
+        if (cursor.moveToFirst()) {
+            totalCalories = cursor.getInt(0);
+        }
+        cursor.close();
+        return totalCalories;
     }
 
     public class Compte {

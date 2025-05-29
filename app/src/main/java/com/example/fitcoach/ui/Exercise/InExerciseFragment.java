@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -17,9 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.fitcoach.R;
@@ -27,6 +30,7 @@ import com.example.fitcoach.Services.ExerciseService;
 import com.example.fitcoach.utils.Timer;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class InExerciseFragment extends Fragment {
     private ExerciseViewModel viewModel;
@@ -40,6 +44,7 @@ public class InExerciseFragment extends Fragment {
     private boolean isServiceBound = false;
     private Timer timer;
     private TextView textPas, textCalories, textDistance, textSpeed, current_step_value, next_step_value;
+    private boolean isMusicPlaying = true;
 
 
     @Override
@@ -78,20 +83,40 @@ public class InExerciseFragment extends Fragment {
         });
         viewModel.getCalories().observe(getViewLifecycleOwner(), val -> {
             if (textCalories != null)
-                textCalories.setText("Calories : " + val + " kcal");
+                textCalories.setText("Calories : " + String.format(Locale.getDefault(), "%.2f", val) + " kcal");
         });
 
         viewModel.getDistance().observe(getViewLifecycleOwner(), val -> {
             if (textDistance != null)
-                textDistance.setText("Distance : " + val + " km");
+                textDistance.setText("Distance : " + String.format(Locale.getDefault(), "%.2f", val) + " km");
         });
 
         viewModel.getSpeed().observe(getViewLifecycleOwner(), val -> {
             if (textSpeed != null)
-                textSpeed.setText("Vitesse : " + val + " km/h");
+                textSpeed.setText("Vitesse : " + String.format(Locale.getDefault(), "%.2f", val) + " km/h");
         });
 
-
+        AppCompatImageButton stopMusicButton = view.findViewById(R.id.pause_music_button);
+        stopMusicButton.setOnClickListener(v -> {
+            if (isMusicPlaying) {
+                Intent intent = new Intent(ExerciseService.ACTION_STOP_MUSIC);
+                localBroadcastManager.sendBroadcast(intent);
+                stopMusicButton.setImageResource(R.drawable.outline_autoplay_24);
+                isMusicPlaying = false;
+            } else {
+                Intent intent = new Intent(ExerciseService.ACTION_RESUME_MUSIC);
+                localBroadcastManager.sendBroadcast(intent);
+                stopMusicButton.setImageResource(R.drawable.ic_pause);
+                isMusicPlaying = true;
+            }
+        });
+        AppCompatImageButton nextMusicButton = view.findViewById(R.id.change_music_button);
+        nextMusicButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ExerciseService.ACTION_CHANGE_MUSIC);
+            localBroadcastManager.sendBroadcast(intent);
+            isMusicPlaying = true;
+            stopMusicButton.setImageResource(R.drawable.ic_pause);
+        });
         return view;
     }
 
@@ -109,12 +134,12 @@ public class InExerciseFragment extends Fragment {
         pause.setOnClickListener(v -> {
             if (timer.isRunning()) {
                 timer.stop();
-                pause.setText("Reprendre");
+                pause.setText("Reprendre l'exercice");
                 localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_PAUSE));
                 Toast.makeText(getContext(), "Pause", Toast.LENGTH_SHORT).show();
             } else {
                 timer.start();
-                pause.setText("Pause");
+                pause.setText("Pause l'exercice");
                 localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_RESUME));
                 Toast.makeText(getContext(), "Reprise", Toast.LENGTH_SHORT).show();
             }
@@ -281,7 +306,7 @@ public class InExerciseFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            NavHostFragment.findNavController(this).navigate(R.id.inexercise_to_execise);
+            NavHostFragment.findNavController(this).navigate(R.id.action_inexercise_to_execise);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -302,12 +327,19 @@ public class InExerciseFragment extends Fragment {
                     int repetition = intent.getIntExtra("repetition", 0);
                     boolean isStopping = intent.getBooleanExtra("isStopping", false);
                     Log.d("ExerciseFragmentReceiver", "onReceive: " + duration+" "+calories+" "+distance+" "+speed);
-                    if(isStopping){
-                        if(timer != null) timer.stop();
-                        if(getView() != null && isAdded() && !isRemoving()){
-                            NavHostFragment.findNavController(InExerciseFragment.this).navigate(R.id.inexercise_to_home);
-                        }
-                        return;
+                    if (intent.getBooleanExtra("isStopping", false) &&
+                            intent.getBooleanExtra("showSummary", false)) {
+                        Bundle summaryData = new Bundle();
+                        summaryData.putInt("steps", intent.getIntExtra("steps", 0));
+                        summaryData.putLong("duration", intent.getLongExtra("duration", 0));
+                        Log.d("ExerciseFragmentReceiver", "onReceive: " +  viewModel.getDuration().getValue());
+                        summaryData.putFloat("calories", intent.getFloatExtra("calories", 0));
+                        summaryData.putFloat("distance", intent.getFloatExtra("distance", 0));
+                        summaryData.putFloat("speed", intent.getFloatExtra("speed", 0));
+                        summaryData.putString("sportType", intent.getStringExtra("sportType"));
+                        summaryData.putInt("repetition", intent.getIntExtra("repetition", 0));
+                        NavController navController = NavHostFragment.findNavController(InExerciseFragment.this);
+                        navController.navigate(R.id.action_inexercise_to_summary, summaryData);
                     }
                     viewModel.setCurrentStep(steps);
                     viewModel.setDuration(duration);
@@ -362,24 +394,24 @@ public class InExerciseFragment extends Fragment {
         }
     }
 
-            private void registerReceiver() {
-                if (!isReceiverRegistered) {
-                    exerciseReceiver = new ExerciseFragmentReceiver();
-                    IntentFilter filter = new IntentFilter(ExerciseService.ACTION_UPDATE_UI);
-                    filter.addAction(ExerciseService.ACTION_SEND_STATUS);
-                    localBroadcastManager.registerReceiver(exerciseReceiver,filter);
-                    isReceiverRegistered = true;
-                }
-            }
+    private void registerReceiver() {
+        if (!isReceiverRegistered) {
+            exerciseReceiver = new ExerciseFragmentReceiver();
+            IntentFilter filter = new IntentFilter(ExerciseService.ACTION_UPDATE_UI);
+            filter.addAction(ExerciseService.ACTION_SEND_STATUS);
+            localBroadcastManager.registerReceiver(exerciseReceiver,filter);
+            isReceiverRegistered = true;
+        }
+    }
 
-            private void unregisterReceiver() {
-                if (isReceiverRegistered) {
-                    localBroadcastManager.unregisterReceiver(exerciseReceiver);
-                    isReceiverRegistered = false;
-                } else {
-                    Toast.makeText(requireContext(), "Receiver not registered", Toast.LENGTH_SHORT).show();
-                }
-            }
+    private void unregisterReceiver() {
+        if (isReceiverRegistered) {
+            localBroadcastManager.unregisterReceiver(exerciseReceiver);
+            isReceiverRegistered = false;
+        } else {
+            Toast.makeText(requireContext(), "Receiver not registered", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     private void updateUI(int steps, float calories, float distance, float speed) {
         if(textPas == null) return;

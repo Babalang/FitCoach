@@ -1,6 +1,5 @@
 package com.example.fitcoach.ui.history;
 
-import android.util.Log;
 
 public class Exercise implements  java.io.Serializable {
     private String date;

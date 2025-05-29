@@ -5,18 +5,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.R;
-import com.example.fitcoach.ui.Exercise.InExerciseFragment;
-
-import java.util.Arrays;
 import java.util.List;
 
 public class HistoryFragment extends Fragment {
@@ -29,7 +23,6 @@ public class HistoryFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_history, container, false);
 
         recyclerView = root.findViewById(R.id.history_recycler);
-        // Récupérer les exercices depuis la base de données
         AppDataManager dataManager = AppDataManager.getInstance(requireContext());
 
         List<Exercise> exerciseList = dataManager.getAllHistorique();

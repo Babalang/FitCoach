@@ -17,7 +17,7 @@
             android:id="@+id/text_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📅 12 avril 2025"
+            android:text="12 avril 2025"
             android:textStyle="bold"
             android:textSize="16sp" />
 
@@ -25,13 +25,13 @@
             android:id="@+id/text_sport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🏃 Course à pied - 32 min" />
+            android:text="Course à pied - 32 min" />
 
         <TextView
             android:id="@+id/text_steps"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="👣 3 487 pas" />
+            android:text="3 487 pas" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

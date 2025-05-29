@@ -6,18 +6,14 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.MainActivity;
 import com.example.fitcoach.R;
 import com.example.fitcoach.Serveur.ApiService;
 import com.example.fitcoach.Serveur.RetrofitClient;
 import com.example.fitcoach.Serveur.User;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -51,6 +47,7 @@ public class loginActivity extends AppCompatActivity {
         EditText phone = findViewById(R.id.input_phone);
         EditText age = findViewById(R.id.input_age);
         EditText weight = findViewById(R.id.input_weight);
+        EditText size = findViewById(R.id.input_size);
         RadioGroup genderGroup = findViewById(R.id.radio_group_gender);
         int selectedId = genderGroup.getCheckedRadioButtonId();
         String sexe = "";
@@ -63,6 +60,7 @@ public class loginActivity extends AppCompatActivity {
         EditText calorieGoal = findViewById(R.id.input_calorie_goal);
         Button btn1 = findViewById(R.id.save_button);
         String finalSexe = sexe;
+        int sizeVal = Integer.parseInt(size.getText().toString().trim());
         int ageVal = Integer.parseInt(age.getText().toString().trim());
         int stepGoalVal = Integer.parseInt(stepGoal.getText().toString().trim());
         int calorieGoalVal = Integer.parseInt(calorieGoal.getText().toString().trim());
@@ -75,7 +73,7 @@ public class loginActivity extends AppCompatActivity {
                 finalSexe,
                 stepGoalVal,
                 calorieGoalVal,
-                0,
+                sizeVal,
                 Float.parseFloat(weight.getText().toString().trim())
         );
 
@@ -114,7 +112,7 @@ public class loginActivity extends AppCompatActivity {
             try {
                 creerCompteServeur(login.getText().toString().trim());
             } catch (NumberFormatException e) {
-                Toast.makeText(this, "Login, Âge, objectif de pas ou de calories incorrect(s)", Toast.LENGTH_SHORT).show();
+                Log.e("loginActivity", "Error parsing input fields", e);
             }
 
         });

@@ -16,15 +16,14 @@
     import android.location.Location;
     import android.location.LocationListener;
     import android.location.LocationManager;
+    import android.media.AudioManager;
+    import android.media.MediaPlayer;
     import android.os.Build;
-    import android.os.Bundle;
     import android.os.Handler;
     import android.os.IBinder;
     import android.os.Looper;
     import android.os.SystemClock;
     import android.util.Log;
-    import android.widget.Toast;
-
     import androidx.core.app.ActivityCompat;
     import androidx.core.app.NotificationCompat;
     import androidx.core.content.ContextCompat;
@@ -36,12 +35,20 @@
     import com.example.fitcoach.ui.Exercise.ExerciseStep;
 
     import java.util.ArrayList;
+    import org.json.JSONArray;
+    import org.json.JSONObject;
+    import java.net.HttpURLConnection;
+    import java.net.URL;
+    import java.io.InputStreamReader;
+    import java.io.BufferedReader;
 
     public class ExerciseService extends Service {
 
         private ExerciseReceiver exerciseReceiver;
         private boolean isReceiverRegistered = false;
         private LocalBroadcastManager localBroadcastManager;
+        private MediaPlayer mediaPlayer;
+
         public static final String ACTION_PAUSE = "com.example.fitcoach.PAUSE";
         public static final String ACTION_STOP = "com.example.fitcoach.STOP";
         public static final String ACTION_RESUME = "com.example.fitcoach.RESUME";
@@ -50,6 +57,9 @@
         public static final String ACTION_UPDATE_UI = "com.example.fitcoach.UPDATE_UI";
         public static final String ACTION_REQUEST_STATUS = "com.example.fitcoach.ACTION_REQUEST_STATUS";
         public static final String ACTION_SEND_STATUS = "com.example.fitcoach.ACTION_SEND_STATUS";
+        public static final String ACTION_CHANGE_MUSIC = "com.example.fitcoach.ACTION_CHANGE_MUSIC";
+        public static final String ACTION_STOP_MUSIC = "com.example.fitcoach.ACTION_STOP_MUSIC";
+        public static final String ACTION_RESUME_MUSIC = "com.example.fitcoach.ACTION_RESUME_MUSIC";
 
 
         private boolean isRunning = false;
@@ -93,8 +103,10 @@
                     pauseExercise();
                 } else if (intent.getAction().equals(ACTION_STOP)) {
                     stopExercise();
+                    updateNotification();
                 } else if (intent.getAction().equals(ACTION_RESUME)) {
                     resumeExercise();
+                    updateNotification();
                 } else if (intent.getAction().equals(ACTION_START)) {
                     startExercise(intent.getStringExtra("sport"), intent.getBooleanExtra("isChronoMode", false));
                 } else if (intent.getAction().equals(ACTION_INCREMENT_STEP)) {
@@ -112,6 +124,18 @@
                     statusIntent.putExtra("isChronoMode", isChronoMode);
                     statusIntent.putExtra("repetition", repetition);
                     localBroadcastManager.sendBroadcast(statusIntent);
+                } else if (ACTION_CHANGE_MUSIC.equals(intent.getAction())) {
+                    Log.d(TAG, "onReceive: Changing music");
+                    stopMusic();
+                    startMusic();
+                } else if (ACTION_STOP_MUSIC.equals(intent.getAction())) {
+                    Log.d(TAG, "onReceive: Stopping music");
+                    pauseMusic();
+                } else if (ACTION_RESUME_MUSIC.equals(intent.getAction())) {
+                    Log.d(TAG, "onReceive: Resuming music");
+                    resumeMusic();
+                } else {
+                    Log.w(TAG, "onReceive: Action non reconnue : " + intent.getAction());
                 }
 
             }
@@ -127,6 +151,9 @@
                 filter.addAction(ACTION_INCREMENT_STEP);
                 filter.addAction(ACTION_REQUEST_STATUS);
                 filter.addAction(StepCounterService.ACTION_STEP_COUNT_UPDATE);
+                filter.addAction(ACTION_CHANGE_MUSIC);
+                filter.addAction(ACTION_STOP_MUSIC);
+                filter.addAction(ACTION_RESUME_MUSIC);
 
                 localBroadcastManager.registerReceiver(exerciseReceiver, filter);
                 isReceiverRegistered = true;
@@ -138,12 +165,101 @@
                 localBroadcastManager.unregisterReceiver(exerciseReceiver);
                 isReceiverRegistered = false;
             } else {
-                Toast.makeText(this, "Receiver not registered", Toast.LENGTH_SHORT).show();
             }
         }
 
         public boolean isReceiverRegistered() {
                 return isReceiverRegistered;
+        }
+
+        private void fetchAndPlayRandomTrack() {
+            new Thread(() -> {
+                try {
+                    URL url = new URL("https://api.jamendo.com/v3.0/tracks/?client_id=b960794f&format=json&limit=100&order=popularity_total_desc&tags=fitness");
+                    Log.d("ExerciseService", "Requête Jamendo : " + url);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) response.append(line);
+                    reader.close();
+
+                    Log.d("ExerciseService", "Réponse Jamendo : " + response);
+                    JSONObject json = new JSONObject(response.toString());
+                    JSONArray tracks = json.getJSONArray("results");
+                    if (tracks.length() > 0) {
+                        int randomIndex = (int) (Math.random() * tracks.length());
+                        String streamUrl = tracks.getJSONObject(randomIndex).getString("audio");
+                        Log.d("ExerciseService", "URL musique trouvée : " + streamUrl);
+                        new Handler(Looper.getMainLooper()).post(() -> playMusic(streamUrl));
+                    } else {
+                        Log.e("ExerciseService", "Aucune piste trouvée dans la réponse Jamendo");
+                    }
+                } catch (Exception e) {
+                    Log.e("ExerciseService", "Erreur Jamendo", e);
+                }
+            }).start();
+        }
+
+        private void playMusic(String url) {
+            stopMusic();
+            mediaPlayer = new MediaPlayer();
+            try {
+                mediaPlayer.setDataSource(url);
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.setLooping(false);
+                mediaPlayer.prepareAsync();
+                mediaPlayer.setOnPreparedListener(mp -> mp.start());
+                mediaPlayer.setOnCompletionListener(mp -> fetchAndPlayRandomTrack());
+                Log.d("ExerciseService", "Lecture de la musique : " + url);
+            } catch (Exception e) {
+                Log.e("ExerciseService", "Erreur MediaPlayer", e);
+            }
+        }
+
+        private void startMusic() {
+            fetchAndPlayRandomTrack();
+        }
+
+        private void pauseMusic() {
+            try {
+                if (mediaPlayer != null) {
+                    mediaPlayer.pause();
+                }
+            } catch (IllegalStateException e) {
+                Log.e("ExerciseService", "Erreur lors de la pause de la musique", e);
+            } catch (Exception e) {
+                Log.e("ExerciseService", "Exception inattendue lors de la pause", e);
+            }
+        }
+
+        private void resumeMusic() {
+            try {
+                if (mediaPlayer != null) {
+                    mediaPlayer.start();
+                }
+            } catch (IllegalStateException e) {
+                Log.e("ExerciseService", "Erreur lors de la reprise de la musique", e);
+            }
+        }
+
+        private void stopMusic() {
+            if (mediaPlayer != null) {
+                try {
+                    mediaPlayer.stop();
+                } catch (IllegalStateException e) {
+                    Log.w("ExerciseService", "MediaPlayer déjà arrêté ou pas prêt", e);
+                } catch (Exception e) {
+                    Log.e("ExerciseService", "Erreur inattendue lors de l'arrêt", e);
+                }
+                try {
+                    mediaPlayer.release();
+                } catch (Exception e) {
+                    Log.e("ExerciseService", "Erreur lors du release", e);
+                }
+                mediaPlayer = null;
+            }
         }
 
         @Override
@@ -179,7 +295,6 @@
                     manager.createNotificationChannel(channel);
                 }
             }
-            // Vérifier d'abord les permissions
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
                 Log.e("ExerciseService", "Permission de localisation non accordée");
@@ -215,6 +330,16 @@
                         case ACTION_INCREMENT_STEP:
                             repetition++;
                             break;
+                        case ACTION_CHANGE_MUSIC:
+                            stopMusic();
+                            startMusic();
+                            break;
+                        case ACTION_STOP_MUSIC:
+                            stopMusic();
+                            break;
+                        case ACTION_RESUME_MUSIC:
+                            resumeMusic();
+                            break;
                         default:
                             break;
 
@@ -231,6 +356,7 @@
         }
 
         public void startExercise(String sport, boolean isChronoMode) {
+            startMusic();
             this.isChronoMode = isChronoMode;
             sportType = (sport != null) ? sport : "marche";
             startTimeMillis = SystemClock.elapsedRealtime();
@@ -244,12 +370,13 @@
                 uiHandler.removeCallbacks(uiRunnable);
                 uiHandler.post(uiRunnable);
             }
-            Toast.makeText(this, "Exercice démarré", Toast.LENGTH_SHORT).show();
             Log.d("ExerciseService", "Exercice démarré ; sport : " + sportType);
         }
 
         public void pauseExercise() {
+            pauseMusic();
             isRunning = false;
+            updateNotification();
             if (locationManager != null && locationListener != null) {
                 locationManager.removeUpdates(locationListener);
             }
@@ -279,11 +406,11 @@
             statusIntent.putExtra("sportType", sportType);
             statusIntent.putExtra("repetition", repetition);
             localBroadcastManager.sendBroadcast(statusIntent);
-
             uiHandler.removeCallbacks(uiRunnable);
         }
 
         public void resumeExercise() {
+            resumeMusic();
             startTimeMillis = SystemClock.elapsedRealtime();
             isRunning = true;
             startLocationUpdates();
@@ -334,7 +461,6 @@
             uiHandler.removeCallbacks(uiRunnable);
             stopForeground(true);
             stopSelf();
-            Toast.makeText(this, "Exercice terminé", Toast.LENGTH_SHORT).show();
         }
 
         private void startSendingUIUpdates() {
@@ -402,7 +528,6 @@
                     speed = (distance / (timeDelta / 1000f)) * 3.6f;
                 }
             } else {
-                distance = 0;
                 int stepCount = totalSteps - initialSteps;
                 distance = stepCount * 0.7f;
 
@@ -435,6 +560,9 @@
             Intent stopIntent = new Intent(this, ExerciseService.class);
             stopIntent.setAction(ACTION_STOP);
             PendingIntent stopPendingIntent = PendingIntent.getService(this, 3, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            Intent changeMusicIntent = new Intent(this, ExerciseService.class);
+            changeMusicIntent.setAction(ACTION_CHANGE_MUSIC);
+            PendingIntent changeMusicPendingIntent = PendingIntent.getService(this, 4, changeMusicIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "exercise_channel")
                     .setContentTitle("FitCoach - Exercice en cours")
@@ -453,6 +581,7 @@
                 notificationBuilder.addAction(android.R.drawable.ic_media_play, "Reprendre", resumePendingIntent);
             }
             notificationBuilder.addAction(android.R.drawable.ic_menu_delete, "Arrêter", stopPendingIntent);
+            notificationBuilder.addAction(R.drawable.ic_next_music, "Changer musique", changeMusicPendingIntent);
 
             return notificationBuilder.build();
         }
@@ -476,11 +605,11 @@
             super.onDestroy();
             unregisterReceiver();
             pauseExercise();
+            stopMusic();
             if (locationManager != null && locationListener != null) {
                 locationManager.removeUpdates(locationListener);
             }
             stopForeground(true);
-            Toast.makeText(this, "Exercice terminé, duration : "+totalDurationMillis+" repetitions : "+repetition+" steps : "+(totalSteps-initialSteps)+" calories : "+currentCalories+" distance : "+distance+" speed : "+speed+"", Toast.LENGTH_SHORT).show();
             Log.d("ExerciseService", "Exercice terminé, duration : "+totalDurationMillis+" repetitions : "+repetition+" steps : "+(totalSteps-initialSteps)+" calories : "+currentCalories+" distance : "+distance+" speed : "+speed+"");
         }
 

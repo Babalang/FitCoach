@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.R;
@@ -20,6 +22,7 @@ import com.example.fitcoach.Serveur.User;
 import com.example.fitcoach.databinding.FragmentSocialBinding;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -35,6 +38,11 @@ public class SocialFragment extends Fragment {
     private String scoreAmi;
     private Button boutonAjouteAmi;
     private EditText texteAjoutAmi;
+    private AppDataManager appDataManager;
+    private Integer MyScore = 0;
+    private RecyclerView recyclerViewAmis;
+    private AmiAdapter amiAdapter;
+    private List<AmiAdapter.Ami> listeAmis = new ArrayList<>();
 
     private void fetchUserById(String userId) {
         ApiService apiService = RetrofitClient.getInstance();
@@ -49,25 +57,15 @@ public class SocialFragment extends Fragment {
                         id.setText(user.getNom());
                         score.setText(user.getScore());
                         String amis="";
+                        listeAmis.clear();
                         if(user.getAmi1()!=null){
-                            Log.d(TAG, "score ami: " + user.getAmi1Score());
-                            amis+="Ami : "+user.getAmi1()+". Son score est de : "+user.getAmi1Score()+"\n";
-                            if(user.getAmi2()!=null){
-                                amis+="Ami : "+user.getAmi2()+". Son score est de : "+user.getAmi2Score()+"\n";
-                            }
-                            if(user.getAmi3()!=null){
-                                amis+="Ami : "+user.getAmi3()+". Son score est de : "+user.getAmi3Score()+"\n";
-                            }
-                            if(user.getAmi4()!=null){
-                                amis+="Ami : "+user.getAmi4()+". Son score est de : "+user.getAmi4Score()+"\n";
-                            }
-                            if(user.getAmi5()!=null){
-                                amis+="Ami : "+user.getAmi5()+". Son score est de : "+user.getAmi5Score()+"\n";
-                            }
-                        }else{
-                            amis="Aucun ami\n";
+                            listeAmis.add(new AmiAdapter.Ami(user.getAmi1(), user.getAmi1Score()));
+                            if(user.getAmi2()!=null) listeAmis.add(new AmiAdapter.Ami(user.getAmi2(), user.getAmi2Score()));
+                            if(user.getAmi3()!=null) listeAmis.add(new AmiAdapter.Ami(user.getAmi3(), user.getAmi3Score()));
+                            if(user.getAmi4()!=null) listeAmis.add(new AmiAdapter.Ami(user.getAmi4(), user.getAmi4Score()));
+                            if(user.getAmi5()!=null) listeAmis.add(new AmiAdapter.Ami(user.getAmi5(), user.getAmi5Score()));
                         }
-                        Textami.setText(amis);
+                        amiAdapter.notifyDataSetChanged();
                     } else {
                         Log.e(TAG, "Réponse réussie mais corps vide pour getUserById " + userId);
                     }
@@ -114,14 +112,21 @@ public class SocialFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_social, container, false);
-        AppDataManager appDataManager = AppDataManager.getInstance(getContext());
+        appDataManager = AppDataManager.getInstance(getContext());
         int ide = appDataManager.getCompteId();
         AppDataManager.Compte compte = appDataManager.getCompteById(ide);
         id=view.findViewById(R.id.id);
         score=view.findViewById(R.id.score);
         id.setText(compte.getLogin());
-        score.setText("0");
-        Textami=view.findViewById(R.id.listeAmi);
+        MyScore = appDataManager.getAllCalories();
+        score.setText(String.valueOf(MyScore) + " kcal");
+        recyclerViewAmis = view.findViewById(R.id.recyclerViewAmis);
+        recyclerViewAmis.setLayoutManager(new LinearLayoutManager(getContext()));
+        amiAdapter = new AmiAdapter(listeAmis);
+        listeAmis.add(new AmiAdapter.Ami("Alice", "1200 kcal"));
+        listeAmis.add(new AmiAdapter.Ami("Bob", "950 kcal"));
+        listeAmis.add(new AmiAdapter.Ami("Charlie", "800 kcal"));
+        recyclerViewAmis.setAdapter(amiAdapter);
         boutonAjouteAmi=view.findViewById(R.id.BoutonAjoutAmi);
         texteAjoutAmi=view.findViewById(R.id.TexteAjoutAmi);
         boutonAjouteAmi.setOnClickListener(v->{

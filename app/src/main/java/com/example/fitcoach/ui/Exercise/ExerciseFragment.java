@@ -16,8 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -80,7 +78,7 @@ public class ExerciseFragment extends Fragment {
         Button btn1 = root.findViewById(R.id.button1);
         btn1.setOnClickListener(v -> {
                 NavController navController = NavHostFragment.findNavController(this);
-                navController.navigate(R.id.exercise_to_choose);
+                navController.navigate(R.id.action_exercise_to_choose);
         });
 
         return root;
@@ -115,14 +113,14 @@ public class ExerciseFragment extends Fragment {
         bundle.putString("exercise_type", currentExerciseType != null ? currentExerciseType : "chrono");
 
         NavController controller = NavHostFragment.findNavController(this);
-        controller.navigate(R.id.exercise_to_inexercise, bundle);
+        controller.navigate(R.id.action_exercise_to_inexercise, bundle);
         Log.d(TAG, "Navigation directe vers l'exercice en cours: " + currentSportType + ", " + currentExerciseType);
     }
 
     private class ServiceCheckReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (ExerciseService.ACTION_SEND_STATUS.equals(intent.getAction())) {
+            if (ExerciseService.ACTION_SEND_STATUS.equals(intent.getAction()) && isAdded() && getActivity() != null) {
                 isServiceActive = true;
                 currentSportType = intent.getStringExtra("sportType");
                 boolean isRunning = intent.getBooleanExtra("isRunning", true);
@@ -166,6 +164,7 @@ public class ExerciseFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         unregisterReceiver();
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(serviceCheckReceiver);
         binding = null;
     }
 
@@ -206,8 +205,6 @@ public class ExerciseFragment extends Fragment {
             isReceiverRegistered = false;
             locationReceiver = null;
             Log.d(TAG, "unregisterReceiver: LocationReceiver unregistered");
-        } else {
-            Toast.makeText(requireContext(), "Receiver not registered", Toast.LENGTH_SHORT).show();
         }
         if (isReceiverRegistered && localBroadcastManager != null && serviceCheckReceiver != null) {
             localBroadcastManager.unregisterReceiver(serviceCheckReceiver);
