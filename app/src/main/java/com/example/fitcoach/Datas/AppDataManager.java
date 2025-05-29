@@ -8,10 +8,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.fitcoach.ui.history.Exercise;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class AppDataManager {
     private static final String TAG = "AppDataManager";
     private static final String DATABASE_NAME = "fitcoach_data";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
 
     private static final String TABLE_COMPTE = "comptes";
 
@@ -37,6 +42,9 @@ public class AppDataManager {
     private static final String COLUMN_CALORIES_OBJECTIVE = "calories_objective";
     private static final String COLUMN_TAILLE = "taille";
     private static final String COLUMN_POIDS = "poids";
+    private static final String COLUMN_DURATION = "duration";
+    private static final String COLUMN_SPEED = "speed";
+    private static final String COLUMN_REPETITION = "repetition";
 
     private static final String CREATE_TABLE_COMPTE =
             "CREATE TABLE " + TABLE_COMPTE + "("+
@@ -60,7 +68,10 @@ public class AppDataManager {
             COLUMN_CALORIES+" INTEGER, " +
             COLUMN_STEPS+" INTEGER, " +
             COLUMN_BASE_STEPS+" INTEGER, " +
-            COLUMN_DISTANCE+" FLOAT);";
+            COLUMN_DISTANCE+" FLOAT, " +
+            COLUMN_DURATION+" INTEGER,"+
+            COLUMN_REPETITION+" INTEGER," +
+            COLUMN_SPEED+" FLOAT);";
 
     private static final String CREATE_TABLE_STEPCOUNTER =
             "CREATE TABLE " + TABLE_STEPCOUNTER + "("+
@@ -152,13 +163,17 @@ public class AppDataManager {
         db.insert(TABLE_COMPTE, null, values);
     }
 
-    public void insertHistorique(String date, String exercice, int calories, int steps, float distance){
+    public void insertHistorique(String date, String exercice, int calories, int steps, float distance, long duration, int repetition, float speed) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_DATE, date);
         values.put(COLUMN_EXERCICE, exercice);
         values.put(COLUMN_CALORIES, calories);
         values.put(COLUMN_STEPS, steps);
         values.put(COLUMN_DISTANCE, distance);
+        values.put(COLUMN_BASE_STEPS, steps); // Ajoute les pas de base
+        values.put(COLUMN_DURATION, duration); // Ajoute une durée par défaut
+        values.put(COLUMN_REPETITION, repetition); // Ajoute une répétition par défaut
+        values.put(COLUMN_SPEED, speed); // Ajoute une vitesse par défaut
         db.insert(TABLE_HISTORIQUE, null, values);
     }
 
@@ -194,13 +209,17 @@ public class AppDataManager {
     }
 
 
-    public void updateHistorique(int id, String date, String exercice, float calories, int steps, float distance){
+    public void updateHistorique(int id, String date, String exercice, float calories, int steps, float distance, long duration, int repetition, float speed) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_DATE, date);
         values.put(COLUMN_EXERCICE, exercice);
         values.put(COLUMN_CALORIES, calories);
         values.put(COLUMN_STEPS, steps);
         values.put(COLUMN_DISTANCE, distance);
+        values.put(COLUMN_BASE_STEPS, steps); // Met à jour les pas de base
+        values.put(COLUMN_DURATION, duration); // Met à jour la durée par défaut
+        values.put(COLUMN_REPETITION, repetition); // Met à jour la répétition par défaut
+        values.put(COLUMN_SPEED, speed); // Met à jour la vitesse par défaut
         db.update(TABLE_HISTORIQUE, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
     }
     public void updateStepCounter(int id, String date, int steps, int baseSteps, float calories, float distance) {
@@ -338,6 +357,52 @@ public class AppDataManager {
         }
         cursor.close();
         return id;
+    }
+
+    public List<Exercise> getAllHistorique() {
+        List<Exercise> exerciseList = new ArrayList<>();
+        String query = "SELECT * FROM " + TABLE_HISTORIQUE + " ORDER BY " + COLUMN_DATE + " DESC";
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE));
+                String exercice = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXERCICE));
+                float calories = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_CALORIES));
+                int steps = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STEPS));
+                float distance = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_DISTANCE));
+                long duration = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DURATION));
+                int repetition = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REPETITION));
+                float speed = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_SPEED));
+
+                Exercise exercise = new Exercise(date, exercice, duration, steps, calories, distance, speed, repetition);
+                exerciseList.add(exercise);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return exerciseList;
+    }
+
+    public Exercise getLastHistorique() {
+        String query = "SELECT * FROM " + TABLE_HISTORIQUE + " ORDER BY " + COLUMN_DATE + " DESC LIMIT 1";
+        Cursor cursor = db.rawQuery(query, null);
+        Exercise lastExercise = null;
+
+        if (cursor.moveToFirst()) {
+            String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE));
+            String exercice = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXERCICE));
+            float calories = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_CALORIES));
+            int steps = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STEPS));
+            float distance = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_DISTANCE));
+            long duration = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_DURATION));
+            int repetition = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REPETITION));
+            float speed = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_SPEED));
+
+            lastExercise = new Exercise(date, exercice, duration, steps, calories, distance, speed, repetition);
+        }
+        cursor.close();
+        return lastExercise;
     }
 
     public class Compte {

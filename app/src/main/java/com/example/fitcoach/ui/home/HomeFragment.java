@@ -24,9 +24,12 @@ import com.example.fitcoach.MainActivity;
 import com.example.fitcoach.R;
 import com.example.fitcoach.Services.StepCounterService;
 import com.example.fitcoach.databinding.FragmentHomeBinding;
+import com.example.fitcoach.ui.history.Exercise;
 import com.example.fitcoach.ui.history.HistoryFragment;
 import androidx.navigation.fragment.NavHostFragment;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 
 public class HomeFragment extends Fragment {
@@ -73,6 +76,29 @@ public class HomeFragment extends Fragment {
                 binding.stepsInfo.setText(stepCount + " / "+appDataManager.getStepsObjective(appDataManager.getCompteId())+" pas");
             }
         });
+
+        Exercise lastEntry = appDataManager.getLastHistorique();
+        TextView tvLastSport = binding.exerciseNameInfo;
+        TextView tvLastCalories = binding.calInfo;
+        TextView tvLastDate = binding.dateInfo;
+
+        if (lastEntry != null) {
+            tvLastSport.setText(lastEntry.getSport());
+            tvLastCalories.setText(String.format(Locale.getDefault(), "%.1f kcal", lastEntry.getCalories()));
+            try {
+                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                String formattedDate = outputFormat.format(inputFormat.parse(lastEntry.getDate()));
+                tvLastDate.setText(formattedDate);
+            } catch (Exception e) {
+                tvLastDate.setText(lastEntry.getDate()); // fallback en cas d'erreur
+            }
+        } else {
+            tvLastSport.setText("Aucun");
+            tvLastCalories.setText("0 kcal");
+            tvLastDate.setText("-");
+        }
+
 
         binding.cardContainerHistory.setOnClickListener(v -> {
             NavHostFragment.findNavController(HomeFragment.this)

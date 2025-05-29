@@ -41,6 +41,12 @@
         android:name="com.example.fitcoach.ui.history.HistoryFragment"
         android:label="@string/title_history"
         tools:layout="@layout/fragment_history" />
+    <action
+        android:id="@+id/action_history_to_summary"
+        app:destination="@id/exercise_summary"
+        app:popUpTo="@id/navigation_history"
+        app:popUpToInclusive="true"
+        app:launchSingleTop="true"/>
     <fragment
         android:id="@id/navigation_music"
         android:name="com.example.fitcoach.ui.Music.MusicFragment"
@@ -102,6 +108,12 @@
             app:popUpTo="@id/in_exercise"
             app:popUpToInclusive="true"
             app:launchSingleTop="true"/>
+        <action
+            android:id="@+id/inexercise_to_summary"
+            app:destination="@id/exercise_summary"
+            app:popUpTo="@id/in_exercise"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
     </fragment>
     <fragment
         android:id="@+id/infos"
@@ -114,6 +126,19 @@
             app:popUpTo="@id/infos"
             app:popUpToInclusive="true"
             app:launchSingleTop="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/exercise_summary"
+        android:name="com.example.fitcoach.ui.history.ExerciseSummaryFragment"
+        android:label="Résumé"
+        tools:layout="@layout/fragment_exercise_summary">
+    <action
+        android:id="@+id/summary_to_history"
+        app:destination="@id/navigation_history"
+        app:popUpTo="@id/exercise_summary"
+        app:popUpToInclusive="true"
+        app:launchSingleTop="true"/>
     </fragment>
 
 

@@ -27,6 +27,7 @@
 
     import androidx.core.app.ActivityCompat;
     import androidx.core.app.NotificationCompat;
+    import androidx.core.content.ContextCompat;
     import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
     import com.example.fitcoach.Datas.AppDataManager;
@@ -52,6 +53,7 @@
 
 
         private boolean isRunning = false;
+        private boolean isStopping = false;
         private long startTimeMillis = 0;
         private long totalDurationMillis = 0;
         private int totalSteps = 0;
@@ -154,6 +156,9 @@
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId){
+            if(isStopping){
+                return START_NOT_STICKY;
+            }
             if(localBroadcastManager == null){
                 localBroadcastManager = LocalBroadcastManager.getInstance(this);
             }
@@ -174,8 +179,19 @@
                     manager.createNotificationChannel(channel);
                 }
             }
+            // Vérifier d'abord les permissions
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Log.e("ExerciseService", "Permission de localisation non accordée");
+                stopSelf();
+                return START_NOT_STICKY;
+            }
             Notification intitialNotification = createNotification("Exercice en cours...");
-            startForeground(1,intitialNotification);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(1, intitialNotification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+            } else {
+                startForeground(1, intitialNotification);
+            }
             if(intent != null){
                 String action = intent.getAction();
                 if(action != null){
@@ -290,33 +306,34 @@
         }
 
         public void stopExercise() {
+            isStopping = true;
+            if (isRunning && startTimeMillis > 0) {
+                totalDurationMillis += SystemClock.elapsedRealtime() - startTimeMillis;
+                startTimeMillis = 0;
+            }
+
             isRunning = false;
+
             if (locationManager != null && locationListener != null) {
                 locationManager.removeUpdates(locationListener);
             }
             Intent intent = new Intent(ACTION_SEND_STATUS);
             intent.putExtra("isRunning", false);
             intent.putExtra("steps", totalSteps - initialSteps);
-            intent.putExtra("duration", getElapsedExerciseTimeMillis()/1000);
+            intent.putExtra("duration", totalDurationMillis/1000);
             intent.putExtra("calories", currentCalories);
             intent.putExtra("distance", distance);
             intent.putExtra("speed", speed);
             intent.putExtra("sportType", sportType);
             intent.putExtra("repetition", repetition);
             intent.putExtra("isStopping", true);
+            intent.putExtra("showSummary", true);
             localBroadcastManager.sendBroadcast(intent);
+            Log.d("ExerciseService", "Exercice terminé ; duration : " + totalDurationMillis/1000);
             uiHandler.removeCallbacks(uiRunnable);
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                stopForeground(STOP_FOREGROUND_REMOVE);
-            } else {
-                stopForeground(true);
-            }
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.cancel(1);
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                stopSelf();
-            }, 200);
+            uiHandler.removeCallbacks(uiRunnable);
+            stopForeground(true);
+            stopSelf();
             Toast.makeText(this, "Exercice terminé", Toast.LENGTH_SHORT).show();
         }
 
