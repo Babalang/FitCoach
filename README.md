@@ -36,7 +36,6 @@ FitCoach est une application Android de suivi d'activité physique, permettant d
 - Les couleurs et styles dans `res/values/colors.xml` et `styles.xml`.
 
 ## Auteurs
-LANGOUET Bastian
-DUPUIS Thibaut
+LANGOUET Bastian - DUPUIS Thibaut
 
 - Projet FitCoach — 2025
