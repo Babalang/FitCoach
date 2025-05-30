@@ -21,4 +21,8 @@ public interface ApiService {
     @FormUrlEncoded
     @POST("/setAmi")
     Call<User> nouveauAmi(@Field("nom") String nom, @Field("ami") String ami);
+
+    @FormUrlEncoded
+    @POST("/setCoordonnee")
+    Call<User> setCoordonnee(@Field("nom") String nom, @Field("latitude") double la, @Field("longitude") double lo);
 }

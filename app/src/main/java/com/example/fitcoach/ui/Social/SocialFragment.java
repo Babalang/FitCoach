@@ -123,9 +123,9 @@ public class SocialFragment extends Fragment {
         recyclerViewAmis = view.findViewById(R.id.recyclerViewAmis);
         recyclerViewAmis.setLayoutManager(new LinearLayoutManager(getContext()));
         amiAdapter = new AmiAdapter(listeAmis);
-        listeAmis.add(new AmiAdapter.Ami("Alice", "1200 kcal"));
-        listeAmis.add(new AmiAdapter.Ami("Bob", "950 kcal"));
-        listeAmis.add(new AmiAdapter.Ami("Charlie", "800 kcal"));
+        //listeAmis.add(new AmiAdapter.Ami("Alice", "1200 kcal"));
+        //listeAmis.add(new AmiAdapter.Ami("Bob", "950 kcal"));
+        //listeAmis.add(new AmiAdapter.Ami("Charlie", "800 kcal"));
         recyclerViewAmis.setAdapter(amiAdapter);
         boutonAjouteAmi=view.findViewById(R.id.BoutonAjoutAmi);
         texteAjoutAmi=view.findViewById(R.id.TexteAjoutAmi);

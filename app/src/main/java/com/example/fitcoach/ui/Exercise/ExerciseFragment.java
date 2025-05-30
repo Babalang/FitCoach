@@ -24,10 +24,15 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.fitcoach.Datas.AppDataManager;
 import com.example.fitcoach.R;
+import com.example.fitcoach.Serveur.ApiService;
+import com.example.fitcoach.Serveur.RetrofitClient;
+import com.example.fitcoach.Serveur.User;
 import com.example.fitcoach.Services.ExerciseService;
 import com.example.fitcoach.Services.LocationService;
 import com.example.fitcoach.databinding.FragmentExerciseBinding;
+import com.example.fitcoach.ui.Social.AmiAdapter;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,6 +42,14 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ExerciseFragment extends Fragment {
     private FragmentExerciseBinding binding;
@@ -53,18 +66,93 @@ public class ExerciseFragment extends Fragment {
     private boolean isReceiverRegistered = false;
     private FusedLocationProviderClient fusedLocationClient;
     private Location lastKnownLocation;
+    private List<Marker> markers = new ArrayList<>();
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         localBroadcastManager = LocalBroadcastManager.getInstance(context);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+    }
 
+    private void addfetchUserById2(String userId, String num) {
+        ApiService apiService = RetrofitClient.getInstance();
+        Call<User> call = apiService.getUserById(userId);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful()) {
+                    User user = response.body();
+                    if (user != null) {
+                        Log.d(TAG, "coordonnees: "+user.getLatitude()+" "+user.getLongitude());
+                        addMarker(new GeoPoint(user.getLongitude(), user.getLatitude()), num);
+                    } else {
+                        Log.e(TAG, "Réponse réussie mais corps vide pour getUserById " + userId);
+                    }
+                } else {
+                    Log.e(TAG, "Erreur getUserById " + userId + " (code " + response.code() + "): " + response.message());
+                    if (response.errorBody() != null) {
+                        try {
+                            Log.e(TAG, "Corps de l'erreur: " + response.errorBody().string());
+                        } catch (IOException e) {
+                            Log.e(TAG, "Erreur lors de la lecture du corps de l'erreur", e);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                Log.e(TAG, "Échec de l'appel getUserById " + userId + ": " + t.getMessage(), t);
+            }
+        });
+    }
+
+    private void addfetchUserById(String userId) {
+        ApiService apiService = RetrofitClient.getInstance();
+        Call<User> call = apiService.getUserById(userId);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful()) {
+                    User user = response.body();
+                    if (user != null) {
+                        addMarker(new GeoPoint(user.getLongitude(), user.getLatitude()), user.getNom());
+                        if(user.getAmi1()!=null){
+                            addfetchUserById2(user.getAmi1(),"1");
+                            if(user.getAmi2()!=null) addfetchUserById2(user.getAmi2(),"2");
+                            if(user.getAmi3()!=null) addfetchUserById2(user.getAmi3(),"3");
+                            if(user.getAmi4()!=null) addfetchUserById2(user.getAmi4(),"4");
+                            if(user.getAmi5()!=null) addfetchUserById2(user.getAmi5(),"5");
+                        }
+                    } else {
+                        Log.e(TAG, "Réponse réussie mais corps vide pour getUserById " + userId);
+                    }
+                } else {
+                    Log.e(TAG, "Erreur getUserById " + userId + " (code " + response.code() + "): " + response.message());
+                    if (response.errorBody() != null) {
+                        try {
+                            Log.e(TAG, "Corps de l'erreur: " + response.errorBody().string());
+                        } catch (IOException e) {
+                            Log.e(TAG, "Erreur lors de la lecture du corps de l'erreur", e);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                Log.e(TAG, "Échec de l'appel getUserById " + userId + ": " + t.getMessage(), t);
+            }
+        });
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: called");
+        AppDataManager appDataManager = AppDataManager.getInstance(getContext());
+        int ide = appDataManager.getCompteId();
+        AppDataManager.Compte compte = appDataManager.getCompteById(ide);
         binding = FragmentExerciseBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
         localBroadcastManager = LocalBroadcastManager.getInstance(requireContext());
@@ -80,7 +168,8 @@ public class ExerciseFragment extends Fragment {
                 NavController navController = NavHostFragment.findNavController(this);
                 navController.navigate(R.id.action_exercise_to_choose);
         });
-
+        addfetchUserById(compte.getLogin());
+        addMarker(new GeoPoint(43.6047, 1.4442), "Toulouse");
         return root;
     }
 
@@ -225,6 +314,27 @@ public class ExerciseFragment extends Fragment {
             map.invalidate();
         }
     }
+
+    private void addMarker(GeoPoint geoPoint, String title) {
+        Marker marker = new Marker(map);
+        marker.setPosition(geoPoint);
+        marker.setTitle(title);
+        marker.setIcon(ContextCompat.getDrawable(requireContext(), R.drawable.baseline_my_location_24));
+        markers.add(marker);
+        map.getOverlays().add(marker);
+        map.invalidate();
+    }
+
+    private void updateMarker(GeoPoint geoPoint, int index) {
+        if (index < 0 || index >= markers.size()) {
+            Log.e(TAG, "updateMarker: Index out of bounds");
+            return;
+        }
+        Marker marker = markers.get(index);
+        marker.setPosition(geoPoint);
+        map.invalidate();
+        Log.d(TAG, "updateMarker: Marker updated at index " + index);
+    }
     private void getLastLocation() {
         Log.d(TAG, "getLastLocation: function called");
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -239,6 +349,7 @@ public class ExerciseFragment extends Fragment {
                         if (location != null) {
                             lastKnownLocation = location;
                             Log.d(TAG, "getLastLocation: position found");
+                            enregistrerLocation(location.getLatitude(),location.getLongitude());
                             map.getController().setZoom(18.0);
                             map.getController().setCenter(new GeoPoint(location.getLatitude(), location.getLongitude()));
                             updatePositionMarker(new GeoPoint(location.getLatitude(), location.getLongitude()));
@@ -249,5 +360,27 @@ public class ExerciseFragment extends Fragment {
                         }
                     }
                 });
+    }
+
+    private void enregistrerLocation(double longitude,double latitude){
+        ApiService apiService = RetrofitClient.getInstance();
+        AppDataManager appDataManager = AppDataManager.getInstance(getContext());
+        int ide = appDataManager.getCompteId();
+        AppDataManager.Compte compte = appDataManager.getCompteById(ide);
+        Call<User> call = apiService.setCoordonnee(compte.getLogin(),latitude,longitude);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "vol coordonnee reussi : ");
+                } else {
+                    Log.e(TAG, "coordonnee non valide");
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                Log.e(TAG, "Nom non valide");
+            }
+        });
     }
 }

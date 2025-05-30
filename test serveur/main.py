@@ -15,6 +15,8 @@ class User(db.Model):
     ami3=db.Column(db.String,unique=True)
     ami4=db.Column(db.String,unique=True)
     ami5=db.Column(db.String,unique=True)
+    longitude=db.Column(db.Float)
+    latitude=db.Column(db.Float)
 with app.app_context():
     db.create_all()
     
@@ -23,7 +25,7 @@ def getAllUsers():
     users = db.session.execute(db.select(User)).all()
     Users=[]
     for user in users:
-        utilisateur={"nom":user[0].nom, "score":user[0].score}
+        utilisateur={"nom":user[0].nom, "score":user[0].score, "longitude": user[0].longitude, "latitude": user[0].latitude}
         # Users.append({"nom":user[0].nom, "score":user[0].score, "ami1":user[0].ami1,"ami2":user[0].ami2, "ami3":user[0].ami3, "ami4":user[0].ami4, "ami5":user[0].ami5})
         if user[0].ami1:
             score1=User.query.filter_by(nom=user[0].ami1).first()
@@ -53,7 +55,7 @@ def getMe():
     nom = request.form["nom"]
     user = User.query.filter_by(nom=nom).first()
     if user:
-        utilisateur = {"nom": user.nom, "score": user.score, "ami1": user.ami1, "ami2": user.ami2, "ami3": user.ami3, "ami4": user.ami4, "ami5": user.ami5}
+        utilisateur = {"nom": user.nom, "score": user.score, "ami1": user.ami1, "ami2": user.ami2, "ami3": user.ami3, "ami4": user.ami4, "ami5": user.ami5, "longitude": user.longitude, "latitude": user.latitude}
         if user.ami1:
             score1=User.query.filter_by(nom=user.ami1).first()
             utilisateur["ami1Score"]=score1.score
@@ -82,6 +84,8 @@ def createuser():
         user = User(
             nom=request.form["nom"],
             score="0",
+            longitude=37.4219983,
+            latitude=-122.1,
             # ami1=request.form["ami1"],
             # ami2=request.form["ami2"],
             # ami3=request.form["ami3"],
@@ -101,6 +105,20 @@ def setScore():
         user.score = nouveau_score
         db.session.commit()
         return jsonify({"success": True, "message": "Score mis à jour"})
+    else:
+        return jsonify({"success": False, "message": "Utilisateur non trouvé"}), 404
+    
+@app.route("/setCoordonnee", methods=["GET", "POST"])
+def setCoordonnee():
+    nom = request.form["nom"]
+    la= request.form["latitude"]
+    lo= request.form["longitude"]
+    user = User.query.filter_by(nom=nom).first()
+    if user:
+        user.latitude = la
+        user.longitude = lo
+        db.session.commit()
+        return jsonify({"success": True, "message": "coordonnes mis à jour"})
     else:
         return jsonify({"success": False, "message": "Utilisateur non trouvé"}), 404
     

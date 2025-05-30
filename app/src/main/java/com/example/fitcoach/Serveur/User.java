@@ -39,6 +39,12 @@ public class User {
     @SerializedName("ami5Score")
     private String ami5Score;
 
+    @SerializedName("latitude")
+    private double latitude;
+
+    @SerializedName("longitude")
+    private double longitude;
+
     public User(String nom, String score) {
         this.nom = nom;
         this.score = score;
@@ -138,5 +144,22 @@ public class User {
 
     public void setAmi5Score(String ami5Score) {
         this.ami5Score = ami5Score;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
