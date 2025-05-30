@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">FitCoach</string>
+    <string name="app_name" translatable="false">FitCoach</string>
     <string name="title_home">Accueil</string>
-    <string name="title_social">Social</string>
+    <string name="title_social" translatable="false">Social</string>
     <string name="title_history">Historique</string>
     <string name="title_exercise">Exercice</string>
-    <string name="title_music">Musique</string>
+    <string name="title_music" translatable="false">Musique</string>
 
     <string-array name="sports_array">
         <item>Course</item>
@@ -18,6 +18,54 @@
         <item>Course fractionnée</item>
         <item>Custom</item>
     </string-array>
+    <string name="Choose_Exercise_title">Choisis ton exercice</string>
+    <string name="Choose_Exercice_radio1">Endurance</string>
+    <string name="Choose_Exercice_radio2">Force</string>
+    <string name="Choose_Exercice_addSequence">Ajouter une séquence</string>
+    <string name="Choose_Exercice_start">Démarrer l\'exercice</string>
+    <string name="Exercice_start">Lancer un exercice</string>
+    <string name="Summary_resume">Résumé de l\'entraînement</string>
+    <string name="General_course">Course</string>
+    <string name="General_duree">Durée</string>
+    <string name="summary_duree">Durée :</string>
+    <string name="General_pas">Pas</string>
+    <string name="summary_pas">Pas :</string>
+    <string name="General_Distance" translatable="false">Distance</string>
+    <string name="summary_distance" translatable="false">Distance :</string>
+    <string name="Summary_avg_speed">Vitesse moy. :</string>
+    <string name="General_calories" translatable="false">Calories</string>
+    <string name="Summary_calories" translatable="false">Calories :</string>
+    <string name="Summary_repetition">Répétitions :</string>
+    <string name="Summary_save">Enregistrer dans l\'historique</string>
+    <string name="General_backhome">Retour à l\'accueil</string>
+    <string name="marche">Marche</string>
+    <string name="General_pause">Pause l\'exercice</string>
+    <string name="General_stop">Arrêter l\'exercice</string>
+    <string name="infos_title">Informations personnelles</string>
+    <string name="infos_telephone">Téléphone</string>
+    <string name="infos_poids">Poids (kg)</string>
+    <string name="infos_taille">Taille (cm)</string>
+    <string name="infos_genre">Genre</string>
+    <string name="infos_homme">Homme</string>
+    <string name="infos_femme">Femme</string>
+    <string name="infos_objectifs">Objectifs quotidien</string>
+    <string name="infos_obj_pas">Objectif de pas</string>
+    <string name="infos_obj_cal">Objectif de calories (kcal)</string>
+    <string name="infos_save">Enregistrer</string>
+    <string name="social_liste_amis">Liste d\'amis</string>
+    <string name="social_my_id">Mon identifiant :</string>
+    <string name="social_my_score">Mon score :</string>
+    <string name="social_add_friend">Ajouter un ami</string>
+    <string name="General_Ajouter">Ajouter</string>
+    <string name="item_ami_nom">Nom ami</string>
+    <string name="General_name">Nom</string>
+    <string name="app_bar_parametres">Paramètres</string>
+    <string name="pause" translatable="false">Pause</string>
+    <string name="Reprendre">Reprendre</string>
+    <string name="General_resume">Reprendre l\'exercice</string>
+    <string name="enregistre">Enregistré</string>
+    <string name="arreter">Arrêter</string>
+    <string name="change_musique">Changer musique</string>
 
 
 </resources>

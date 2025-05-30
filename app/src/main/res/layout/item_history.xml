@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Item pour la recycleView de l'historique -->
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -25,13 +26,13 @@
             android:id="@+id/text_sport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Course à pied - 32 min" />
+            android:text="Running - 32 min" />
 
         <TextView
             android:id="@+id/text_steps"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="3 487 pas" />
+            android:text="3 487 Steps" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

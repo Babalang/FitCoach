@@ -1,5 +1,4 @@
 package com.example.fitcoach.ui.Exercise;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Page sociale -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,11 +7,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.Social.SocialFragment">
 
+    <!-- Titre de la  page -->
     <TextView
         android:id="@+id/text_dashboard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Liste d'amis"
+        android:text="@string/social_liste_amis"
         android:textAlignment="center"
         android:textStyle="bold"
         android:textSize="22sp"
@@ -20,6 +22,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginBottom="16dp"/>
 
+    <!-- Cardview pour l'esthétique -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardUser"
         android:layout_width="0dp"
@@ -39,6 +42,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Informations personnelles -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,7 +53,7 @@
                     android:id="@+id/textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mon identifiant :"
+                    android:text="@string/social_my_id"
                     android:textStyle="bold"/>
 
                 <TextView
@@ -60,6 +64,7 @@
                     android:text=""/>
             </LinearLayout>
 
+            <!-- Score -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -71,7 +76,7 @@
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mon score :"
+                    android:text="@string/social_my_score"
                     android:textStyle="bold"/>
 
                 <TextView
@@ -84,6 +89,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- RecyclerView pour la liste d'amis -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardAmi"
         android:layout_width="0dp"
@@ -108,6 +114,7 @@
             android:scrollbars="vertical"/>
     </androidx.cardview.widget.CardView>
 
+    <!-- Layout pour ajouter un ami -->
     <LinearLayout
         android:id="@+id/ajoutAmiLayout"
         android:layout_width="0dp"
@@ -126,7 +133,7 @@
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
-            android:hint="Ajouter un ami"
+            android:hint="@string/social_add_friend"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:textSize="16sp"/>
@@ -136,7 +143,7 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginStart="12dp"
-            android:text="Ajouter"/>
+            android:text="@string/General_Ajouter"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.history;
-
+// Classe pour afficher l'historique des exercices dans un fragment
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,22 +14,18 @@ import com.example.fitcoach.R;
 import java.util.List;
 
 public class HistoryFragment extends Fragment {
-
     private RecyclerView recyclerView;
 
+    // Méthode pour créer la vue du fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_history, container, false);
-
         recyclerView = root.findViewById(R.id.history_recycler);
         AppDataManager dataManager = AppDataManager.getInstance(requireContext());
-
         List<Exercise> exerciseList = dataManager.getAllHistorique();
-
         HistoryAdapter adapter = new HistoryAdapter(exerciseList, exercise -> {
             Bundle bundle = new Bundle();
-            Log.d("HistoryFragment", "Exercise clicked: " + exercise.getSport() + " on " + exercise.getDate() + " with " + exercise.getSteps() + " steps");
             bundle.putSerializable("exercise", exercise);
             NavController navController = NavHostFragment.findNavController(HistoryFragment.this);
             navController.navigate(R.id.action_history_to_summary, bundle);

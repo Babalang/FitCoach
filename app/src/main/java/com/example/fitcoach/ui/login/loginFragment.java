@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.login;
-
+// Classe pour gérer le changement des informations du compte utilisateur
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,8 +30,7 @@ public class loginFragment extends Fragment {
     private long coords[];
     private AppDataManager appDataManager;
 
-
-
+    // Méthod à la création de la vue du fragment pour afficher et modifier les informations du compte utilisateur
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -89,6 +88,7 @@ public class loginFragment extends Fragment {
         return view;
     }
 
+    // Méthode pour gérer les options du menu, ici pour afficher la flèche de retour
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

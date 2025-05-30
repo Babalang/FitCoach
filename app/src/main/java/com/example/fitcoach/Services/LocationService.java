@@ -1,5 +1,5 @@
 package com.example.fitcoach.Services;
-
+// Classe pour le service de localisation
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -28,21 +28,21 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
 public class LocationService extends Service {
-
     private FusedLocationProviderClient fusedLocationClient;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
-
     public static final String ACTION_LOCATION_UPDATE = "com.example.fitcoach.LOCATION_UPDATE";
     public static final String EXTRA_LAT = "extra_lat";
     public static final String EXTRA_LON = "extra_lon";
     private static final String TAG = "LocationService";
 
+    // Liaison pour le service de localisation
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+    // Méthode appelée lors de la création du service
     @Override
     public void onCreate() {
         super.onCreate();
@@ -51,6 +51,7 @@ public class LocationService extends Service {
         createLocationCallback();
     }
 
+    // Méthode appelée lors du démarrage du service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(1, createNotification());
@@ -58,12 +59,14 @@ public class LocationService extends Service {
         return START_STICKY;
     }
 
+    // Méthode appelée lors de la destruction du service
     @Override
     public void onDestroy() {
         stopLocationUpdates();
         super.onDestroy();
     }
 
+    // Méthode pour créer une requête de localisation
     private void createLocationRequest() {
         locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
                 .setWaitForAccurateLocation(false)
@@ -72,6 +75,7 @@ public class LocationService extends Service {
                 .build();
     }
 
+    // Méthode pour créer un rappel de localisation
     private void createLocationCallback() {
         locationCallback = new LocationCallback() {
             @Override
@@ -84,6 +88,7 @@ public class LocationService extends Service {
         };
     }
 
+    // Méthode pour envoyer une diffusion de mise à jour de localisation
     private void sendLocationBroadcast(Location location) {
         Intent intent = new Intent(ACTION_LOCATION_UPDATE);
         intent.putExtra(EXTRA_LAT, location.getLatitude());
@@ -92,6 +97,7 @@ public class LocationService extends Service {
         Log.d(TAG, "sendLocationBroadcast: position send " + location.getLatitude() + ", " + location.getLongitude());
     }
 
+    // Méthodes pour démarrer et arrêter les mises à jour de localisation
     private void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -110,10 +116,12 @@ public class LocationService extends Service {
         );
     }
 
+    // Méthode pour arrêter les mises à jour de localisation
     private void stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback);
     }
 
+    // Méthode pour créer une notification pour le service de localisation
     private Notification createNotification() {
         String channelId = "location_service_channel";
         String channelName = "Location Service Channel";

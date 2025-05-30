@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.Exercise;
-
+// Classe pour choisir le type d'exercice et les étapes du chronomètre
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,11 +32,9 @@ import com.example.fitcoach.R;
 import com.example.fitcoach.Services.ExerciseService;
 
 public class ChooseExerciseFragment extends Fragment {
-
     private Spinner sportSpinner;
     private ImageView sportImage;
     private Button startButton;
-
     private String[] sports;
     private String[] sportsTimer;
     private int[] sportImages = {
@@ -55,13 +53,12 @@ public class ChooseExerciseFragment extends Fragment {
     private Button addStepButton;
     private ExerciseStepAdapter adapter;
 
-
+    // Création de la vue du fragment et initialisation des éléments de l'interface utilisateur
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_choose_exercise, container, false);
-
         sportSpinner = view.findViewById(R.id.sport_spinner);
         sportImage = view.findViewById(R.id.sport_image);
         startButton = view.findViewById(R.id.start_exercise_button);
@@ -74,7 +71,6 @@ public class ChooseExerciseFragment extends Fragment {
         adapter = new ExerciseStepAdapter(timerSteps);
         stepsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         stepsRecycler.setAdapter(adapter);
-
         group.setOnCheckedChangeListener((radioGroup, checkedId) -> {
             if (checkedId == R.id.gps_radio) {
                 stepsRecycler.setVisibility(View.GONE);
@@ -95,7 +91,6 @@ public class ChooseExerciseFragment extends Fragment {
                             sportImage.setImageResource(sportImages[position]);
                         }
                     }
-
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {}
                 });
@@ -115,7 +110,6 @@ public class ChooseExerciseFragment extends Fragment {
                         android.R.layout.simple_spinner_item, sportsTimer);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 sportSpinner.setAdapter(adapter);
-
                 sportSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -123,34 +117,29 @@ public class ChooseExerciseFragment extends Fragment {
                             sportImage.setImageResource(sportImagesTimer[position]);
                         }
                     }
-
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {}
                 });
 
             }
         });
-
         startButton.setOnClickListener(v -> {
             String selectedSport = (String) sportSpinner.getSelectedItem();
             int checkedId = group.getCheckedRadioButtonId();
             boolean isChrono = true;
             String exerciseType = "chrono";
-
             ArrayList<ExerciseStep> stepsToSend = isChrono ? new ArrayList<>() : new ArrayList<>(timerSteps);
-
             Bundle bundle = new Bundle();
             bundle.putString("selected_sport", selectedSport);
             bundle.putString("exercise_type", exerciseType);
             bundle.putSerializable("timer_steps", stepsToSend);
             Log.d("ChooseExerciseFragment", "ExerciseService started, isChrono: " + isChrono + ", stepsToSend: " + stepsToSend.size() + ", selectedSport: " + selectedSport + ", exerciseType: " + exerciseType);
-
             Navigation.findNavController(v).navigate(R.id.action_choose_to_inexercise, bundle);
         });
-
         return view;
     }
 
+    // Méthode pour démarrer le service d'exercice avec les paramètres sélectionnés
     private void startExerciseService(String sportType, boolean isChrono, ArrayList<ExerciseStep> steps) {
         Intent intent = new Intent(requireContext(), ExerciseService.class);
         intent.putExtra("sport_type", sportType);

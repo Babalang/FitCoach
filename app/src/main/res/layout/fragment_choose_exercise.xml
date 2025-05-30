@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Affichage de la page de choix d'exercice -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp">
 
+    <!-- Titre de la page -->
     <TextView
         android:id="@+id/exercise_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choisis ton exercice"
+        android:text="@string/Choose_Exercise_title"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Choix entre exercices de force et d'endurance -->
     <RadioGroup
         android:id="@+id/exercise_type_group"
         android:layout_width="match_parent"
@@ -24,20 +27,19 @@
         app:layout_constraintTop_toBottomOf="@id/exercise_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
         <RadioButton
             android:id="@+id/gps_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Endurance" />
-
+            android:text="@string/Choose_Exercice_radio1" />
         <RadioButton
             android:id="@+id/timer_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Force" />
+            android:text="@string/Choose_Exercice_radio2" />
     </RadioGroup>
 
+    <!-- Sélecteur de sport -->
     <Spinner
         android:id="@+id/sport_spinner"
         android:layout_width="0dp"
@@ -47,6 +49,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Affichage d'une image représentant le sport choisi -->
     <ImageView
         android:id="@+id/sport_image"
         android:layout_width="100dp"
@@ -58,6 +61,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Affichage des étapes de l'exercice pour le mode Timer (Non utilisé dans la version finale) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/timer_steps_recycler"
         android:layout_width="0dp"
@@ -69,20 +73,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_bias="0" />
 
+    <!-- Bouton pour ajouter une étape à l'exercice (Non utilisé dans la version finale) -->
     <Button
         android:id="@+id/add_step_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ajouter une séquence"
+        android:text="@string/Choose_Exercice_addSequence"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/timer_steps_recycler"
         app:layout_constraintStart_toStartOf="parent" />
-
+    <!-- Bouton pour lancer l'exercice -->
     <Button
         android:id="@+id/start_exercise_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Démarrer l'exercice"
+        android:text="@string/Choose_Exercice_start"
         android:textSize="16sp"
         android:layout_marginTop="32dp"
         android:backgroundTint="@color/colorPrimary"

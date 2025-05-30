@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Fragment pour le résumé d'un exercice -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,17 +7,19 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <!-- Affichage du titre de la page -->
     <TextView
         android:id="@+id/tvSummaryTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Résumé de l'entraînement"
+        android:text="@string/Summary_resume"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Cardview pour améliorer l'esthétique de la page -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,7 +30,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvSummaryTitle">
-
+        <!-- Informations sur l'exercice terminé -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,7 +44,7 @@
                 android:gravity="center"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="Course" />
+                tools:text="@string/General_course" />
 
             <View
                 android:layout_width="match_parent"
@@ -58,7 +61,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Durée :"
+                    android:text="@string/summary_duree"
                     android:textStyle="bold" />
 
                 <TextView
@@ -79,7 +82,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Pas :"
+                    android:text="@string/summary_pas"
                     android:textStyle="bold" />
 
                 <TextView
@@ -100,7 +103,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Distance :"
+                    android:text="@string/summary_distance"
                     android:textStyle="bold" />
 
                 <TextView
@@ -121,7 +124,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Vitesse moy. :"
+                    android:text="@string/Summary_avg_speed"
                     android:textStyle="bold" />
 
                 <TextView
@@ -142,7 +145,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Calories :"
+                    android:text="@string/Summary_calories"
                     android:textStyle="bold" />
 
                 <TextView
@@ -164,7 +167,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Répétitions :"
+                    android:text="@string/Summary_repetition"
                     android:textStyle="bold"
                     android:visibility="visible" />
 
@@ -181,23 +184,25 @@
 
     </androidx.cardview.widget.CardView>
 
+    <!-- Bouton pour enregistrer dans l'historique -->
     <Button
         android:id="@+id/btnSaveToHistory"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="Enregistrer dans l'historique"
+        android:text="@string/Summary_save"
         android:backgroundTint="@color/colorPrimary"
         app:layout_constraintBottom_toTopOf="@+id/btnBackToHome"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Bouton pour revenir à la page d'historique -->
     <Button
         android:id="@+id/btnBackToHome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="Retour à l'accueil"
+        android:text="@string/General_backhome"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

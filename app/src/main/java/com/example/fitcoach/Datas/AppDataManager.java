@@ -1,5 +1,6 @@
 package com.example.fitcoach.Datas;
-
+// AppDataManager.java
+// Classe pour gérer les données de l'application FitCoach
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -46,6 +47,7 @@ public class AppDataManager {
     private static final String COLUMN_SPEED = "speed";
     private static final String COLUMN_REPETITION = "repetition";
 
+    // Requêtes SQL pour créer les tables
     private static final String CREATE_TABLE_COMPTE =
             "CREATE TABLE " + TABLE_COMPTE + "("+
             COLUMN_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -89,6 +91,7 @@ public class AppDataManager {
 
     private AppDataManager(){}
 
+    // Méthodes pour obtenir l'instance unique de AppDataManager
     public static synchronized AppDataManager getInstance() {
         if(instance == null){
             instance = new AppDataManager();
@@ -96,6 +99,7 @@ public class AppDataManager {
         return instance;
     }
 
+    // Méthode pour obtenir l'instance unique de AppDataManager avec le contexte
     public static synchronized AppDataManager getInstance(Context context) {
         if (instance == null) {
             instance = new AppDataManager();
@@ -104,7 +108,7 @@ public class AppDataManager {
         return instance;
     }
 
-
+    // Méthode pour initialiser la base de données
     public void init(Context context){
         dHelper = new DataBaseHelper(context);
         db = dHelper.getWritableDatabase();
@@ -127,10 +131,11 @@ public class AppDataManager {
         cursor2.close();
     }
 
-
+    // Classe interne pour gérer la base de données SQLite
     private static class DataBaseHelper extends SQLiteOpenHelper{
         DataBaseHelper(Context context){super(context, DATABASE_NAME, null, DATABASE_VERSION);}
 
+        // Méthodes pour créer et mettre à jour la base de données
         @Override
         public void onCreate(SQLiteDatabase db){
             db.execSQL(CREATE_TABLE_COMPTE);
@@ -148,6 +153,7 @@ public class AppDataManager {
         }
     }
 
+    // Méthodes pour insérer, mettre à jour et supprimer des données dans la base de données
     public void insertCompte(String login, String email, String telephone, int age, String sexe, int stepsObjective, int caloriesObjective, boolean isCompleted, int taille, float poids){
         ContentValues values = new ContentValues();
         values.put(COLUMN_LOGIN, login);
@@ -243,6 +249,8 @@ public class AppDataManager {
         db.delete(TABLE_STEPCOUNTER, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
     }
 
+    // Méthodes pour récupérer des données de la base de données
+    // Récupération du nombre de pas
     public int getSteps(int id) {
         try{
             if(db == null || !db.isOpen()){
@@ -263,6 +271,7 @@ public class AppDataManager {
 
     }
 
+    // Récupération des calories
     public float getCalories(int id) {
         SQLiteDatabase db = null;
         try {
@@ -281,6 +290,7 @@ public class AppDataManager {
         return calories;
     }
 
+    // Récupération de la date du dernier reset
     public String getLastResetDate(int id) {
         String query = "SELECT " + COLUMN_LAST_RESET_DATE + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
@@ -303,6 +313,7 @@ public class AppDataManager {
         return baseSteps;
     }
 
+    // Récupération de la distance parcourue
     public float getDistance(int id) {
         String query = "SELECT " + COLUMN_DISTANCE + " FROM " + TABLE_STEPCOUNTER + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
@@ -314,6 +325,7 @@ public class AppDataManager {
         return distance;
     }
 
+    // Récupération des informations du compte
     public boolean isCompleted(int id) {
         String query = "SELECT " + COLUMN_IS_COMPLETED + " FROM " + TABLE_COMPTE + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
@@ -326,6 +338,7 @@ public class AppDataManager {
     }
 
 
+    // Récupération des objectifs de pas et de calories
     public int getStepsObjective(int id) {
         String query = "SELECT " + COLUMN_STEPS_OBJECTIVE + " FROM " + TABLE_COMPTE + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});
@@ -348,6 +361,7 @@ public class AppDataManager {
         return caloriesObjective;
     }
 
+    // Récupération de l'id du compte courant
     public int getCompteId() {
         String query = "SELECT " + COLUMN_ID + " FROM " + TABLE_COMPTE + " LIMIT 1";
         Cursor cursor = db.rawQuery(query, null);
@@ -359,6 +373,7 @@ public class AppDataManager {
         return id;
     }
 
+    // Récupération de la liste des exercices dans l'historique
     public List<Exercise> getAllHistorique() {
         List<Exercise> exerciseList = new ArrayList<>();
         String query = "SELECT * FROM " + TABLE_HISTORIQUE + " ORDER BY " + COLUMN_DATE + " DESC";
@@ -384,6 +399,7 @@ public class AppDataManager {
         return exerciseList;
     }
 
+    // Récupération du dernier exercice de l'historique
     public Exercise getLastHistorique() {
         String query = "SELECT * FROM " + TABLE_HISTORIQUE + " ORDER BY " + COLUMN_DATE + " DESC LIMIT 1";
         Cursor cursor = db.rawQuery(query, null);
@@ -405,6 +421,7 @@ public class AppDataManager {
         return lastExercise;
     }
 
+    // Récupération du total de calories de l'historique
     public int getAllCalories(){
         String query = "SELECT SUM(" + COLUMN_CALORIES + ") FROM " + TABLE_HISTORIQUE;
         Cursor cursor = db.rawQuery(query, null);
@@ -417,6 +434,7 @@ public class AppDataManager {
         return totalCalories;
     }
 
+    // Classe pour représenter les comptes
     public class Compte {
         private int id;
         private String login;
@@ -430,6 +448,7 @@ public class AppDataManager {
         private int stepsObjective;
         private int caloriesObjective;
 
+        // Constructeur pour initialiser un compte
         public Compte(int id, String login, String email, String telephone, int age,int poids, int taille, String sexe, boolean isCompleted, int stepsObjective, int caloriesObjective) {
             this.id = id;
             this.login = login;
@@ -444,6 +463,7 @@ public class AppDataManager {
             this.caloriesObjective = caloriesObjective;
         }
 
+        // Getters pour accéder aux attributs du compte
         public int getId() { return id; }
         public String getLogin() { return login; }
         public String getEmail() { return email; }
@@ -457,6 +477,7 @@ public class AppDataManager {
         public int getCaloriesObjective() { return caloriesObjective; }
     }
 
+    // Méthode pour récupérer un compte par son ID
     public Compte getCompteById(int id) {
         String query = "SELECT * FROM " + TABLE_COMPTE + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(id)});

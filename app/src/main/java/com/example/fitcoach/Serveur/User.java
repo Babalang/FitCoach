@@ -1,5 +1,5 @@
 package com.example.fitcoach.Serveur;
-
+// Classe représentant un utilisateur
 import com.google.gson.annotations.SerializedName;
 
 public class User {

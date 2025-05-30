@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.home;
-
+// Fragment pour afficher les informations de la page d'accueil de l'application FitCoach
 import  android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +27,6 @@ import java.util.Locale;
 
 
 public class HomeFragment extends Fragment {
-
     private FragmentHomeBinding binding;
     private StepCountReceiver stepCountReceiver;
     private boolean isReceiverRegistered = false;
@@ -36,16 +35,14 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
     private DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
+    // Méthode pour créer la vue du fragment et initialiser les éléments de l'interface utilisateur
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: called");
-
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
         AppDataManager appDataManager = AppDataManager.getInstance();
         TextView distance = binding.distanceInfo;
         TextView caloriesInfo = binding.caloriesInfo;
@@ -59,23 +56,19 @@ public class HomeFragment extends Fragment {
                 caloriesInfo.setText(decimalFormat.format(cal) + " / "+appDataManager.getCaloriesObjective(appDataManager.getCompteId())+" kcal");
             }
         });
-
         int currentSteps = appDataManager.getSteps(0);
         homeViewModel.setStepCount(currentSteps);
-
         homeViewModel.getStepCount().observe(getViewLifecycleOwner(), stepCount -> {
             if (binding != null) {
                 binding.circularGauge.setValue(stepCount);
                 binding.circularGauge.setTotal(appDataManager.getStepsObjective(appDataManager.getCompteId()));
-                binding.stepsInfo.setText(stepCount + " / "+appDataManager.getStepsObjective(appDataManager.getCompteId())+" pas");
+                binding.stepsInfo.setText(stepCount + " / "+appDataManager.getStepsObjective(appDataManager.getCompteId())+" " + getString(R.string.General_pas));
             }
         });
-
         Exercise lastEntry = appDataManager.getLastHistorique();
         TextView tvLastSport = binding.exerciseNameInfo;
         TextView tvLastCalories = binding.calInfo;
         TextView tvLastDate = binding.dateInfo;
-
         if (lastEntry != null) {
             tvLastSport.setText(lastEntry.getSport());
             tvLastCalories.setText(String.format(Locale.getDefault(), "%.1f kcal", lastEntry.getCalories()));
@@ -88,12 +81,10 @@ public class HomeFragment extends Fragment {
                 tvLastDate.setText(lastEntry.getDate());
             }
         } else {
-            tvLastSport.setText("Aucun");
+            tvLastSport.setText("None");
             tvLastCalories.setText("0 kcal");
             tvLastDate.setText("-");
         }
-
-
         binding.cardContainerHistory.setOnClickListener(v -> {
             NavHostFragment.findNavController(HomeFragment.this)
                     .navigate(R.id.action_home_to_history);
@@ -102,10 +93,10 @@ public class HomeFragment extends Fragment {
             NavHostFragment.findNavController(HomeFragment.this)
                     .navigate(R.id.action_home_to_exercise);
         });
-
         return root;
     }
 
+    // Méthode pour la reprise du fragment, où le BroadcastReceiver est enregistré pour recevoir les mises à jour du service de comptage de pas
     @Override
     public void onResume() {
         super.onResume();
@@ -113,6 +104,7 @@ public class HomeFragment extends Fragment {
         registerReceiver();
     }
 
+    // Méthode pour la destruction de la vue du fragment, où le BroadcastReceiver est désenregistré pour éviter les fuites de mémoire
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -120,6 +112,7 @@ public class HomeFragment extends Fragment {
         binding = null;
     }
 
+    // Classe interne pour recevoir les mises à jour du service de comptage de pas
     private class StepCountReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -134,6 +127,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    // Méthodes pour enregistrer et désenregistrer le BroadcastReceiver
     private void registerReceiver() {
         if (!isReceiverRegistered) {
             stepCountReceiver = new StepCountReceiver();
@@ -142,7 +136,6 @@ public class HomeFragment extends Fragment {
             isReceiverRegistered = true;
         }
     }
-
     private void unregisterReceiver() {
         if (isReceiverRegistered) {
             localBroadcastManager.unregisterReceiver(stepCountReceiver);
@@ -150,6 +143,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    // Méthode pour vérifier si le service de comptage de pas est démarré
     public boolean isServiceStarted() {
         if (getActivity() instanceof MainActivity) {
             return ((MainActivity) getActivity()).isServiceStarted();

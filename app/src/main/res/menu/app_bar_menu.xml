@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Affichage de la barre de menu en haut de l'écran -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_settings"
-        android:title="Paramètres"
+        android:title="@string/app_bar_parametres"
         android:showAsAction="always" />
 </menu>

@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.Exercise;
-
+// Classe pour gérer le fragment d'exercice en cours
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,8 +34,6 @@ import java.util.Locale;
 
 public class InExerciseFragment extends Fragment {
     private ExerciseViewModel viewModel;
-
-
     private ExerciseService exerciseService;
     private ExerciseFragmentReceiver exerciseReceiver;
     private boolean isReceiverRegistered = false;
@@ -47,13 +45,13 @@ public class InExerciseFragment extends Fragment {
     private boolean isMusicPlaying = true;
 
 
+    // Création de la vue du fragment et initialisation des éléments de l'interface utilisateur
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(ExerciseViewModel.class);
         setHasOptionsMenu(true);
         localBroadcastManager = LocalBroadcastManager.getInstance(requireContext());
-
         Bundle args = getArguments();
         if (args != null) {
             viewModel.setExerciseType(args.getString("exercise_type"));
@@ -63,7 +61,6 @@ public class InExerciseFragment extends Fragment {
         if (viewModel.getExerciseType() == null) {
             return null;
         }
-
         View view;
         if ("timer".equals(viewModel.getExerciseType().getValue())) {
             view = inflater.inflate(R.layout.fragment_in_exercise_timer, container, false);
@@ -79,23 +76,20 @@ public class InExerciseFragment extends Fragment {
         }
         viewModel.getCurrentStep().observe(getViewLifecycleOwner(), val -> {
             if (textPas != null)
-                textPas.setText("Pas : " + val);
+                textPas.setText(getString(R.string.summary_pas) + " " + val);
         });
         viewModel.getCalories().observe(getViewLifecycleOwner(), val -> {
             if (textCalories != null)
                 textCalories.setText("Calories : " + String.format(Locale.getDefault(), "%.2f", val) + " kcal");
         });
-
         viewModel.getDistance().observe(getViewLifecycleOwner(), val -> {
             if (textDistance != null)
                 textDistance.setText("Distance : " + String.format(Locale.getDefault(), "%.2f", val) + " km");
         });
-
         viewModel.getSpeed().observe(getViewLifecycleOwner(), val -> {
             if (textSpeed != null)
-                textSpeed.setText("Vitesse : " + String.format(Locale.getDefault(), "%.2f", val) + " km/h");
+                textSpeed.setText(getString(R.string.Summary_avg_speed) + " " + String.format(Locale.getDefault(), "%.2f", val) + " km/h");
         });
-
         AppCompatImageButton stopMusicButton = view.findViewById(R.id.pause_music_button);
         stopMusicButton.setOnClickListener(v -> {
             if (isMusicPlaying) {
@@ -120,38 +114,34 @@ public class InExerciseFragment extends Fragment {
         return view;
     }
 
+    // Configuration de la vue pour l'exercice en mode chrono
     private void setupChronoView(View view) {
         timer = view.findViewById(R.id.time_value);
         timer.setChronoMode();
         timer.start();
-
         textPas = view.findViewById(R.id.steps_value);
         textCalories = view.findViewById(R.id.calories_value);
         textDistance = view.findViewById(R.id.distance_value);
         textSpeed = view.findViewById(R.id.speed_value);
-
         Button pause = view.findViewById(R.id.pause_button);
         pause.setOnClickListener(v -> {
             if (timer.isRunning()) {
                 timer.stop();
-                pause.setText("Reprendre l'exercice");
+                pause.setText(R.string.General_resume);
                 localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_PAUSE));
-                Toast.makeText(getContext(), "Pause", Toast.LENGTH_SHORT).show();
             } else {
                 timer.start();
-                pause.setText("Pause l'exercice");
+                pause.setText(R.string.General_pause);
                 localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_RESUME));
-                Toast.makeText(getContext(), "Reprise", Toast.LENGTH_SHORT).show();
             }
         });
-
         view.findViewById(R.id.stop_button).setOnClickListener(v -> {
             localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_STOP));
             timer.stop();
-            Toast.makeText(getContext(), "Exercice terminé", Toast.LENGTH_SHORT).show();
         });
     }
 
+    // Configuration de la vue pour l'exercice en mode timer
     private void setupTimerView(View view) {
         timer = view.findViewById(R.id.time_value);
         current_step_value = view.findViewById(R.id.current_step_value);
@@ -160,12 +150,10 @@ public class InExerciseFragment extends Fragment {
         Button stopButton = view.findViewById(R.id.stop_button);
         Button nextStepButton = view.findViewById(R.id.btn_next_step);
         Button restartButton = view.findViewById(R.id.btn_restart);
-
         viewModel.getCurrentStepIndex().observe(getViewLifecycleOwner(), index -> {
             ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
             if (current_step_value != null && steps != null && index < steps.size()) {
                 current_step_value.setText(steps.get(index).getName());
-
                 if (next_step_value != null) {
                     if (index + 1 < steps.size()) {
                         next_step_value.setText(steps.get(index + 1).getName());
@@ -173,7 +161,6 @@ public class InExerciseFragment extends Fragment {
                         next_step_value.setText("Fin de l'exercice");
                     }
                 }
-
                 if (timer != null) {
                     timer.setCountdown(steps.get(index).getDuration());
                     timer.reset();
@@ -181,14 +168,11 @@ public class InExerciseFragment extends Fragment {
                 }
             }
         });
-
         timer.setTimerListener(() -> {
             ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
             Integer currentIndex = viewModel.getCurrentStepIndex().getValue();
-
             if (steps != null && currentIndex != null && currentIndex + 1 < steps.size()) {
                 localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
-
             } else {
                 new AlertDialog.Builder(requireContext())
                         .setTitle("Exercice terminé")
@@ -205,7 +189,6 @@ public class InExerciseFragment extends Fragment {
                         .show();
             }
         });
-
         pauseButton.setOnClickListener(v -> {
             if (timer.isRunning()) {
                 timer.stop();
@@ -219,7 +202,6 @@ public class InExerciseFragment extends Fragment {
                 Toast.makeText(requireContext(), "Reprise", Toast.LENGTH_SHORT).show();
             }
         });
-
         stopButton.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
                     .setTitle("Arrêter l'exercice")
@@ -231,7 +213,6 @@ public class InExerciseFragment extends Fragment {
                     .setNegativeButton("Non", null)
                     .show();
         });
-
         nextStepButton.setOnClickListener(v -> {
             if(viewModel.getCurrentStepIndex().getValue() + 1 < viewModel.getSteps().getValue().size()) {
                 localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_INCREMENT_STEP));
@@ -250,16 +231,12 @@ public class InExerciseFragment extends Fragment {
                         .setCancelable(false)
                         .show();
             }
-            Log.d("InExerciseFragment", "nextStepButton clicked");
         });
-
         restartButton.setOnClickListener(v -> {
             timer.reset();
             timer.start();
         });
-
         viewModel.setCurrentStepIndex(0);
-
         ArrayList<ExerciseStep> steps = viewModel.getSteps().getValue();
         if (steps != null && !steps.isEmpty()) {
             timer.setCountdown(steps.get(0).getDuration());
@@ -268,6 +245,7 @@ public class InExerciseFragment extends Fragment {
         }
     }
 
+    // Méthode appelée lors de la reprise de l'activité pour enregistrer le récepteur de diffusion
     @Override
     public void onResume() {
         super.onResume();
@@ -275,19 +253,19 @@ public class InExerciseFragment extends Fragment {
         registerReceiver();
     }
 
+    // Méthode appelée lors de la destruction de la vue pour désenregistrer le récepteur de diffusion
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         unregisterReceiver();
     }
 
-
+    // Méthode appelée lors du démarrage du fragment pour enregistrer le récepteur et démarrer le service d'exercice si nécessaire
     @Override
     public void onStart() {
         super.onStart();
         registerReceiver();
         localBroadcastManager.sendBroadcast(new Intent(ExerciseService.ACTION_REQUEST_STATUS));
-
         new Handler().postDelayed(() -> {
             if (!isServiceBound) {
                 if (getArguments() != null && getArguments().containsKey("selected_sport")) {
@@ -296,13 +274,14 @@ public class InExerciseFragment extends Fragment {
         }, 500);
     }
 
+    // Méthode appelée lors de l'arrêt du fragment pour désenregistrer le récepteur de diffusion
     @Override
     public void onStop() {
         super.onStop();
         unregisterReceiver();
     }
 
-
+    // Méthode pour gérer les actions du menu, notamment la navigation vers le fragment d'exercice
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -312,6 +291,7 @@ public class InExerciseFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    // Récepteur de diffusion pour recevoir les mises à jour du service d'exercice
     private class ExerciseFragmentReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -332,7 +312,6 @@ public class InExerciseFragment extends Fragment {
                         Bundle summaryData = new Bundle();
                         summaryData.putInt("steps", intent.getIntExtra("steps", 0));
                         summaryData.putLong("duration", intent.getLongExtra("duration", 0));
-                        Log.d("ExerciseFragmentReceiver", "onReceive: " +  viewModel.getDuration().getValue());
                         summaryData.putFloat("calories", intent.getFloatExtra("calories", 0));
                         summaryData.putFloat("distance", intent.getFloatExtra("distance", 0));
                         summaryData.putFloat("speed", intent.getFloatExtra("speed", 0));
@@ -348,9 +327,7 @@ public class InExerciseFragment extends Fragment {
                     viewModel.setSpeed(speed);
                     viewModel.setIsPaused(isPaused);
 
-                    Log.d("inExerciseFragment", "onReceive: " + repetition);
                     if ("timer".equals(viewModel.getExerciseType().getValue())) {
-                        Log.d("inExerciseFragment", "onReceive: " + repetition);
                         viewModel.setCurrentStepIndex(repetition % (viewModel.getSteps().getValue().size()));
                     }
                     if (timer != null) {
@@ -365,7 +342,7 @@ public class InExerciseFragment extends Fragment {
                     }
                     Button pauseButton = getView().findViewById(R.id.pause_button);
                     if(pauseButton!=null){
-                        pauseButton.setText(isPaused? "Reprendre" : "Pause");
+                        pauseButton.setText(isPaused? R.string.Reprendre : R.string.pause);
                     }
                 } else if (ExerciseService.ACTION_UPDATE_UI.equals(intent.getAction())) {
                     int steps = intent.getIntExtra("steps", 0);
@@ -375,25 +352,21 @@ public class InExerciseFragment extends Fragment {
                     float speed = intent.getFloatExtra("speed", 0);
                     String currentStepName = intent.getStringExtra("currentSteps");
                     String nextStepName = intent.getStringExtra("nextSteps");
-                    Log.d("ExerciseFragmentReceiver", "onReceive: " + steps+" "+calories+" "+distance+" "+speed);
                     int repetition = intent.getIntExtra("repetition", 0);
                     viewModel.setCurrentStep(steps);
                     viewModel.setDuration(duration);
                     viewModel.setCalories(calories);
                     viewModel.setDistance(distance);
                     viewModel.setSpeed(speed);
-                    Log.d("inExerciseFragment", "onReceive: " + repetition);
                     if ("timer".equals(viewModel.getExerciseType().getValue()) && viewModel.getSteps() != null && viewModel.getSteps().getValue() != null && viewModel.getCurrentStepIndex().getValue() != (repetition % (viewModel.getSteps().getValue().size())) ) {
-                        Log.d("inExerciseFragment", "onReceive: " + repetition);
                         viewModel.setCurrentStepIndex(repetition % (viewModel.getSteps().getValue().size()));
                     }
                 }
-
-
             }
         }
     }
 
+    // Enregistrement et désenregistrement du récepteur de diffusion pour recevoir les mises à jour du service d'exercice
     private void registerReceiver() {
         if (!isReceiverRegistered) {
             exerciseReceiver = new ExerciseFragmentReceiver();
@@ -403,24 +376,14 @@ public class InExerciseFragment extends Fragment {
             isReceiverRegistered = true;
         }
     }
-
     private void unregisterReceiver() {
         if (isReceiverRegistered) {
             localBroadcastManager.unregisterReceiver(exerciseReceiver);
             isReceiverRegistered = false;
-        } else {
-            Toast.makeText(requireContext(), "Receiver not registered", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void updateUI(int steps, float calories, float distance, float speed) {
-        if(textPas == null) return;
-        textPas.setText("Pas : " + steps);
-        textCalories.setText("Calories : " + calories + " kcal");
-        textDistance.setText("Distance : " + distance + " km");
-        textSpeed.setText("Vitesse : " + speed + " km/h");
-    }
-
+    // Démarre le service d'exercice avec les paramètres sélectionnés
     private void startExerciseService() {
         Intent intent = new Intent(requireContext(), ExerciseService.class);
         intent.setAction(ExerciseService.ACTION_START);

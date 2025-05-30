@@ -14,32 +14,34 @@ import android.view.View;
 import androidx.core.content.ContextCompat;
 
 import com.example.fitcoach.R;
-
+// Classe pour afficher une jauge circulaire
 public class CircularGauge extends View {
-
     private int value = 0;
     private int total = 100;
-
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint plein = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
 
+    // Constructeurs pour initialiser la jauge circulaire
     public CircularGauge(Context context) {
         super(context);
         init();
     }
 
+    // Constructeur avec attributs personnalisés
     public CircularGauge(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
+    // Constructeur avec attributs personnalisés et style
     public CircularGauge(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
+    // Constructeur avec attributs personnalisés, style et défilement
     private void init() {
         paint.setColor(ContextCompat.getColor(getContext(), R.color.stepGauge));
         paint.setStyle(Paint.Style.STROKE);
@@ -57,16 +59,19 @@ public class CircularGauge extends View {
         textPaint.setTypeface(Typeface.DEFAULT_BOLD);
     }
 
+    // Méthodes pour définir la valeur et le total de la jauge
     public void setValue(int value) {
         this.value = value;
         invalidate();
     }
 
+    // Méthode pour définir le total de la jauge
     public void setTotal(int total) {
         this.total = total;
         invalidate();
     }
 
+    // Méthode pour changer la taille de la jauge
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -75,6 +80,7 @@ public class CircularGauge extends View {
         rect.set(padding, padding, size + padding, size + padding);
     }
 
+    // Méthode pour dessiner la jauge circulaire
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);

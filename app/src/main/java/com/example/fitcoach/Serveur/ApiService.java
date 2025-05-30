@@ -6,6 +6,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 
+// Communication avec le serveur
 public interface ApiService {
     @FormUrlEncoded
     @POST("/moi")

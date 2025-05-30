@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.login;
-
+// Classe pour gérer l'activité de connexion et de création de compte
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,8 +22,8 @@ public class loginActivity extends AppCompatActivity {
     private AppDataManager appDataManager;
     private boolean bonLogin = false;
 
+    // Méthode pour créer un compte sur le serveur et localement
     private void creerCompteServeur(String nom){
-        Log.d("test", "test");
         ApiService apiService = RetrofitClient.getInstance();
         Call<User> call = apiService.create(nom);
         call.enqueue(new Callback<User>() {
@@ -41,6 +41,7 @@ public class loginActivity extends AppCompatActivity {
         });
     }
 
+    // Méthode pour créer un compte localement
     private void creerCompteLocal(){
         EditText login = findViewById(R.id.input_login);
         EditText email = findViewById(R.id.input_email);
@@ -64,7 +65,6 @@ public class loginActivity extends AppCompatActivity {
         int ageVal = Integer.parseInt(age.getText().toString().trim());
         int stepGoalVal = Integer.parseInt(stepGoal.getText().toString().trim());
         int calorieGoalVal = Integer.parseInt(calorieGoal.getText().toString().trim());
-
         appDataManager.updateCompte(appDataManager.getCompteId(),
                 login.getText().toString().trim(),
                 email.getText().toString().trim(),
@@ -76,12 +76,12 @@ public class loginActivity extends AppCompatActivity {
                 sizeVal,
                 Float.parseFloat(weight.getText().toString().trim())
         );
-
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
     }
 
+    // Méthode à la création de l'activité pour initialiser les éléments de l'interface utilisateur et gérer les clics
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         appDataManager = AppDataManager.getInstance(this);
@@ -114,7 +114,6 @@ public class loginActivity extends AppCompatActivity {
             } catch (NumberFormatException e) {
                 Log.e("loginActivity", "Error parsing input fields", e);
             }
-
         });
     }
 }

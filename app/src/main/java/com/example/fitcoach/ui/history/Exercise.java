@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.history;
-
+// Classe pour modéliser un exercice
 
 public class Exercise implements  java.io.Serializable {
     private String date;
@@ -11,6 +11,7 @@ public class Exercise implements  java.io.Serializable {
     private float speed;
     private int repetition;
 
+    // Constructeur pour initialiser un exercice avec les attributs nécessaires
     public Exercise(String date, String sport, long duration, int steps, float calories, float distance, float speed, int repetition) {
         this.date = date;
         this.sport = sport;
@@ -22,6 +23,7 @@ public class Exercise implements  java.io.Serializable {
         this.repetition = repetition;
     }
 
+    // Getters et setters pour les attributs de l'exercice
     public String getDate() { return date; }
     public String getSport() { return sport; }
     public long getDuration() { return duration; }

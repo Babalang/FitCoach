@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.Exercise;
-
+// Classe pour le ViewModel de l'exercice
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel;
 import java.util.ArrayList;
 
 public class ExerciseViewModel extends ViewModel {
-
+    // MutableLiveData pour stocker les données de l'exercice avec des getters pour l'accès en lecture et des setters pour la mise à jour des données
     private final MutableLiveData<ArrayList<ExerciseStep>> _steps = new MutableLiveData<>();
     public LiveData<ArrayList<ExerciseStep>> getSteps() {
         return _steps;
@@ -109,6 +109,7 @@ public class ExerciseViewModel extends ViewModel {
 
     }
 
+    // Incremente l'inderex de l'étape actuelle si possible
     public void incrementStep() {
         Integer current = _currentStepIndex.getValue();
         if (current != null && _steps.getValue() != null && current + 1 < _steps.getValue().size()) {
@@ -116,6 +117,7 @@ public class ExerciseViewModel extends ViewModel {
         }
     }
 
+    // Réinitialise les données de l'exercice
     public void resetExerciseData() {
         _steps.setValue(new ArrayList<>());
         _distance.setValue(0.0f);

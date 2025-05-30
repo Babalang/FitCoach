@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.history;
-
+// Classe pour l'affichage du résumé de l'exercice
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +15,8 @@ import java.util.Date;
 import java.util.Locale;
 
 public class ExerciseSummaryFragment extends Fragment {
-
     private FragmentExerciseSummaryBinding binding;
     private boolean exerciseSaved = false;
-
     private String sportType;
     private long duration;
     private int steps;
@@ -27,6 +25,7 @@ public class ExerciseSummaryFragment extends Fragment {
     private float speed;
     private int repetition;
 
+    // Méthode pour créer la vue du fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -34,14 +33,12 @@ public class ExerciseSummaryFragment extends Fragment {
         return binding.getRoot();
     }
 
+    // Méthode appelée après la création de la vue pour initialiser les données et les interactions
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         if (getArguments() != null) {
-
             if(getArguments().getSerializable("exercise") == null) {
-
                 steps = getArguments().getInt("steps", 0);
                 duration = getArguments().getLong("duration", 0);
                 calories = getArguments().getFloat("calories", 0);
@@ -49,8 +46,6 @@ public class ExerciseSummaryFragment extends Fragment {
                 speed = getArguments().getFloat("speed", 0);
                 sportType = getArguments().getString("sportType", "marche");
                 repetition = getArguments().getInt("repetition", 0);
-
-                // Afficher les données dans l'interface
                 binding.tvSportType.setText(sportType);
                 binding.tvDuration.setText(formatDuration(duration));
                 binding.tvSteps.setText(String.valueOf(steps));
@@ -67,8 +62,6 @@ public class ExerciseSummaryFragment extends Fragment {
                     distance = exercise.getDistance();
                     speed = exercise.getSpeed();
                     repetition = exercise.getRepetition();
-
-                    // Afficher les données dans l'interface
                     binding.tvSportType.setText(sportType);
                     binding.tvDuration.setText(formatDuration(duration));
                     binding.tvSteps.setText(String.valueOf(steps));
@@ -78,7 +71,6 @@ public class ExerciseSummaryFragment extends Fragment {
                     binding.btnSaveToHistory.setVisibility(View.GONE);
                 }
             }
-
             if (repetition > 0) {
                 binding.tvRepetitionLabel.setVisibility(View.VISIBLE);
                 binding.tvRepetition.setVisibility(View.VISIBLE);
@@ -88,28 +80,28 @@ public class ExerciseSummaryFragment extends Fragment {
                 binding.tvRepetition.setVisibility(View.GONE);
             }
         }
-
         binding.btnSaveToHistory.setOnClickListener(v -> {
             if (!exerciseSaved) {
                 saveExerciseToHistory();
                 exerciseSaved = true;
-                binding.btnSaveToHistory.setText("Enregistré ✓");
+                binding.btnSaveToHistory.setText(getString(R.string.enregistre) + " ✓");
                 binding.btnSaveToHistory.setEnabled(false);
             }
         });
-
         binding.btnBackToHome.setOnClickListener(v -> {
             NavController navController = NavHostFragment.findNavController(this);
             navController.navigate(R.id.action_summary_to_history);
         });
     }
 
+    // Méthode pour formater la durée en minutes et secondes
     private String formatDuration(long seconds) {
         long minutes = seconds / 60;
         long remainingSeconds = seconds % 60;
         return String.format("%02d:%02d", minutes, remainingSeconds);
     }
 
+    // Méthode pour enregistrer l'exercice dans l'historique
     private void saveExerciseToHistory() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String currentDate = sdf.format(new Date());
@@ -117,6 +109,7 @@ public class ExerciseSummaryFragment extends Fragment {
         dataManager.insertHistorique(currentDate, sportType, (int) calories, steps, distance, duration, repetition, speed);
     }
 
+    // Méthode pour libérer les ressources lors de la destruction de la vue
     @Override
     public void onDestroyView() {
         super.onDestroyView();

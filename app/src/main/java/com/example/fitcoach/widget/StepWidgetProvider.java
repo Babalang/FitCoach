@@ -1,5 +1,5 @@
 package com.example.fitcoach.widget;
-
+// Classe pour le widget de compteur de pas
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -15,6 +15,7 @@ import com.example.fitcoach.Services.StepCounterService;
 
 public class StepWidgetProvider extends AppWidgetProvider {
 
+    // Action pour mettre à jour le widget quand le service de compteur de pas envoie une mise à jour
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
@@ -24,6 +25,7 @@ public class StepWidgetProvider extends AppWidgetProvider {
         }
     }
 
+    // Méthode appelée lors de la mise à jour du widget
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         SharedPreferences prefs = context.getSharedPreferences("step_counter_prefs", Context.MODE_PRIVATE);
@@ -42,6 +44,8 @@ public class StepWidgetProvider extends AppWidgetProvider {
         }
     }
 
+
+    // Méthode appelée pour mettre à jour le widget avec le nombre de pas
     private void updateWidget(Context context, int stepCount) {
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_step);

@@ -1,77 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Déclaration des fragments de la pages ainsi que des actions de transition entre les pages -->
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_home">
 
+    <!-- Fragment de la page d'accueil -->
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.example.fitcoach.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" >
-    <action
-        android:id="@+id/action_home_to_history"
-        app:destination="@id/navigation_history"
-        app:popUpTo="@id/navigation_home"
-        app:popUpToInclusive="true"
-        app:launchSingleTop="true"/>
-    <action
-        android:id="@+id/action_home_to_exercise"
-        app:destination="@id/navigation_exercise"
-        app:popUpTo="@id/navigation_home"
-        app:popUpToInclusive="true"
-        app:launchSingleTop="true"/>
-    <action
-        android:id="@+id/action_home_to_infos"
-        app:destination="@id/navigation_infos"
-        app:popUpTo="@id/navigation_home"
-        app:popUpToInclusive="true"
-        app:launchSingleTop="true"/>
+        <!-- Navigation vers l'historique, la page d'informations et la page d'exercice -->
+        <action
+            android:id="@+id/action_home_to_history"
+            app:destination="@id/navigation_history"
+            app:popUpTo="@id/navigation_home"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+        <action
+            android:id="@+id/action_home_to_exercise"
+            app:destination="@id/navigation_exercise"
+            app:popUpTo="@id/navigation_home"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+        <action
+            android:id="@+id/action_home_to_infos"
+            app:destination="@id/navigation_infos"
+            app:popUpTo="@id/navigation_home"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
     </fragment>
 
+    <!-- Fragment de la page social -->
     <fragment
         android:id="@+id/navigation_social"
         android:name="com.example.fitcoach.ui.Social.SocialFragment"
         android:label="@string/title_social"
         tools:layout="@layout/fragment_social" />
 
+    <!-- Fragment de la page d'historique -->
     <fragment
         android:id="@+id/navigation_history"
         android:name="com.example.fitcoach.ui.history.HistoryFragment"
         android:label="@string/title_history"
         tools:layout="@layout/fragment_history" />
-    <action
-        android:id="@+id/action_history_to_summary"
-        app:destination="@id/navigation_exercise_summary"
-        app:popUpTo="@id/navigation_history"
-        app:popUpToInclusive="true"
-        app:launchSingleTop="true"/>
+        <!-- Navigation vers la page de résumé d'un exercice -->
+        <action
+            android:id="@+id/action_history_to_summary"
+            app:destination="@id/navigation_exercise_summary"
+            app:popUpTo="@id/navigation_history"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+
+    <!-- Fragment de la page d'exercice -->
     <fragment
         android:id="@id/navigation_exercise"
         android:name="com.example.fitcoach.ui.Exercise.ExerciseFragment"
         android:label="@string/title_exercise"
         tools:layout="@layout/fragment_exercise">
-    <action
-        android:id="@+id/action_exercise_to_choose"
-        app:destination="@id/navigation_choose_exercise"
-        app:popUpTo="@id/navigation_exercise"
-        app:popUpToInclusive="true"
-        app:launchSingleTop="true"/>
-    <action
-        android:id="@+id/action_exercise_to_inexercise"
-        app:destination="@id/navigation_in_exercise"
-        app:popUpTo="@id/navigation_exercise"
-        app:popUpToInclusive="true"
-        app:launchSingleTop="true"/>
+        <!-- Navigation vers la page de choix ou de progression de l'exercice -->
+        <action
+            android:id="@+id/action_exercise_to_choose"
+            app:destination="@id/navigation_choose_exercise"
+            app:popUpTo="@id/navigation_exercise"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
+        <action
+            android:id="@+id/action_exercise_to_inexercise"
+            app:destination="@id/navigation_in_exercise"
+            app:popUpTo="@id/navigation_exercise"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"/>
     </fragment>
 
-
+    <!-- Fragment de la page de choix d'exercice -->
     <fragment
         android:id="@+id/navigation_choose_exercise"
         android:name="com.example.fitcoach.ui.Exercise.ChooseExerciseFragment"
         android:label="Choose"
         tools:layout="@layout/fragment_choose_exercise" >
+        <!-- Navigation vers la Map ou la progression d'exercice -->
         <action
             android:id="@+id/action_choose_to_exercise"
             app:destination="@id/navigation_exercise"
@@ -86,11 +96,13 @@
             app:launchSingleTop="true"/>
     </fragment>
 
+    <!-- Page de progression d'exercice -->
     <fragment
         android:id="@+id/navigation_in_exercise"
         android:name="com.example.fitcoach.ui.Exercise.InExerciseFragment"
         android:label="Choose"
         tools:layout="@layout/fragment_in_exercise" >
+        <!-- Navigation vers la map, l'accueil ou le résumé -->
         <action
             android:id="@+id/action_inexercise_to_execise"
             app:destination="@id/navigation_exercise"
@@ -110,11 +122,14 @@
             app:popUpToInclusive="true"
             app:launchSingleTop="true"/>
     </fragment>
+
+    <!-- Fragment des informations personnelles -->
     <fragment
         android:id="@+id/navigation_infos"
         android:name="com.example.fitcoach.ui.login.loginFragment"
         android:label="Choose"
         tools:layout="@layout/fragment_infos" >
+        <!-- Navigation vers la page d'accueil -->
         <action
             android:id="@+id/action_infos_to_home"
             app:destination="@id/navigation_home"
@@ -123,11 +138,13 @@
             app:launchSingleTop="true"/>
     </fragment>
 
+    <!-- Fragment de la page de résumé -->
     <fragment
         android:id="@+id/navigation_exercise_summary"
         android:name="com.example.fitcoach.ui.history.ExerciseSummaryFragment"
         android:label="Résumé"
         tools:layout="@layout/fragment_exercise_summary">
+        <!-- Navigation vers la page d'historique-->
     <action
         android:id="@+id/action_summary_to_history"
         app:destination="@id/navigation_history"
@@ -136,6 +153,7 @@
         app:launchSingleTop="true"/>
     </fragment>
 
+    <!-- Action pour naviguer vers la page d'informations depuis n'importe quelle page -->
     <action
         android:id="@+id/action_global_to_infos"
         app:destination="@id/navigation_infos" />

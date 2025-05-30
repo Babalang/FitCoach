@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.Social;
-
+// Fragment pour afficher et gérer les amis dans l'application FitCoach
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,7 +30,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SocialFragment extends Fragment {
-
     private static final String TAG = "SocialFragment";
     private TextView id;
     private TextView score;
@@ -44,6 +43,7 @@ public class SocialFragment extends Fragment {
     private AmiAdapter amiAdapter;
     private List<AmiAdapter.Ami> listeAmis = new ArrayList<>();
 
+    // Méthode pour récupérer les informations de l'utilisateur par son ID
     private void fetchUserById(String userId) {
         ApiService apiService = RetrofitClient.getInstance();
         Call<User> call = apiService.getUserById(userId);
@@ -88,6 +88,7 @@ public class SocialFragment extends Fragment {
         });
     }
 
+    // Méthode pour ajouter un nouvel ami à la liste des amis de l'utilisateur
     private String ajouterAmi(String nom,String ami){
         ApiService apiService = RetrofitClient.getInstance();
         Call<User> call = apiService.nouveauAmi(nom,ami);
@@ -108,6 +109,7 @@ public class SocialFragment extends Fragment {
         return scoreAmi;
     }
 
+    // Méthode pour créer la vue du fragment et initialiser les éléments de l'interface utilisateur
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -123,9 +125,6 @@ public class SocialFragment extends Fragment {
         recyclerViewAmis = view.findViewById(R.id.recyclerViewAmis);
         recyclerViewAmis.setLayoutManager(new LinearLayoutManager(getContext()));
         amiAdapter = new AmiAdapter(listeAmis);
-        //listeAmis.add(new AmiAdapter.Ami("Alice", "1200 kcal"));
-        //listeAmis.add(new AmiAdapter.Ami("Bob", "950 kcal"));
-        //listeAmis.add(new AmiAdapter.Ami("Charlie", "800 kcal"));
         recyclerViewAmis.setAdapter(amiAdapter);
         boutonAjouteAmi=view.findViewById(R.id.BoutonAjoutAmi);
         texteAjoutAmi=view.findViewById(R.id.TexteAjoutAmi);

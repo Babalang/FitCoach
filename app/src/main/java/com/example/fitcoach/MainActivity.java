@@ -1,4 +1,5 @@
 package com.example.fitcoach;
+// Classe principale de l'application FitCoach
 
 import android.Manifest;
 import android.content.Intent;
@@ -24,16 +25,15 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.example.fitcoach.Datas.AppDataManager;
 
 public class MainActivity extends AppCompatActivity {
-
     private ActivityMainBinding binding;
     private static final int ACTIVITY_RECOGNITION_REQUEST_CODE = 100;
     private static final int LOCATION_REQUEST_CODE = 101;
     private boolean isServiceStarted = false;
     private boolean isLocationStarted = false;
-
     private static AppDataManager appDataManager;
     private static final String TAG = "MainActivity";
 
+    // Méthode de création de l'activité principale
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +45,7 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return;
         }
-
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -67,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
                 startLocationService();
             }
         }
-
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_home, R.id.navigation_social, R.id.navigation_history, R.id.navigation_exercise)
                 .build();
@@ -80,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Méthode pour démarrer le service de compteur de pas
     private void startStepCounterService() {
         Intent serviceIntent = new Intent(MainActivity.this, StepCounterService.class);
         ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
@@ -87,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "startStepCounterService: step service started");
     }
 
+    // Méthode pour démarrer le service de localisation
     private void startLocationService() {
         Intent serviceIntent = new Intent(MainActivity.this, LocationService.class);
         ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
@@ -94,9 +93,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "startLocationService: location service started");
     }
 
-
-
-
+    // Méthode pour gérer les résultats des demandes de permissions
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -122,21 +119,24 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    // Méthodes pour vérifier si les services sont démarrés
     public boolean isServiceStarted() {
         return isServiceStarted;
     }
-
     public boolean isLocationStarted() {
         return isLocationStarted;
     }
 
 
+    // Méthode pour créer le menu de l'application
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.app_bar_menu, menu);
         return true;
     }
 
+    // Méthode pour gérer les actions du menu
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
@@ -147,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // Méthode pour gérer les actions de navigation
     @Override
     protected void onNewIntent(Intent intent){
         super.onNewIntent(intent);

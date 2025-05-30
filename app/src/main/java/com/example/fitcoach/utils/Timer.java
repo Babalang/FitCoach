@@ -15,9 +15,9 @@ import android.view.View;
 import androidx.core.content.ContextCompat;
 
 import com.example.fitcoach.R;
-
+// Classe pour afficher un minuteur avec des fonctionnalités de chronomètre et de compte à rebours
 public class Timer extends View {
-
+    // Interface pour écouter les événements de fin de minuteur
     public interface TimerListener {
         void onTimerFinished();
     }
@@ -26,25 +26,26 @@ public class Timer extends View {
     private boolean isCountdown = false;
     private long totalTime = 0;
     private long elapsedTime = 0;
-
     private final Handler handler = new Handler();
     private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
-
     private TimerListener listener;
 
+    // Constructeurs pour initialiser le minuteur
     public Timer(Context context) {
         super(context);
         init();
     }
 
+    // Constructeur avec attributs personnalisés
     public Timer(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
+    // Initialisation avec attributs personnalisés et style
     private void init() {
         progressPaint.setColor(ContextCompat.getColor(getContext(), R.color.stepGauge));
         progressPaint.setStyle(Paint.Style.STROKE);
@@ -62,6 +63,7 @@ public class Timer extends View {
         textPaint.setTypeface(Typeface.DEFAULT_BOLD);
     }
 
+    // Runnable pour mettre à jour le minuteur toutes les secondes
     private final Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
@@ -84,6 +86,7 @@ public class Timer extends View {
         }
     };
 
+    // Méthode pour démarrer le minuteur
     public void start() {
         if (!isRunning) {
             isRunning = true;
@@ -91,17 +94,20 @@ public class Timer extends View {
         }
     }
 
+    // Méthode pour arrêter le minuteur
     public void stop() {
         isRunning = false;
         handler.removeCallbacks(timerRunnable);
     }
 
+    // Méthode pour réinitialiser le minuteur
     public void reset() {
         stop();
         elapsedTime = isCountdown ? totalTime : 0;
         invalidate();
     }
 
+    // Méthode pour définir le minuteur en mode compte à rebours
     public void setCountdown(long seconds) {
         isCountdown = true;
         totalTime = seconds;
@@ -109,30 +115,36 @@ public class Timer extends View {
         invalidate();
     }
 
+    // Méthode pour définir le minuteur en mode chronomètre
     public void setChronoMode() {
         isCountdown = false;
         elapsedTime = 0;
         invalidate();
     }
 
+    // Méthode pour définir un écouteur pour les événements de fin de minuteur
     public void setTimerListener(TimerListener listener) {
         this.listener = listener;
     }
 
+    // Méthodes pour vérifier l'état du minuteur
     public boolean isRunning() {
         return isRunning;
     }
 
+    // Méthode pour récupérer le temps écoulé au format "mm:ss"
     public String getElapsedTime() {
         long time = isCountdown ? elapsedTime : elapsedTime;
         return String.format("%02d:%02d", time / 60, time % 60);
     }
 
+    // Méthode pour définir le temps écoulé manuellement
     public void setElapsedTime(long elapsedTime) {
         this.elapsedTime = elapsedTime;
         invalidate();
     }
 
+    // Méthode pour dessiner le minuteur sur le canvas
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);

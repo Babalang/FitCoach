@@ -1,5 +1,5 @@
 package com.example.fitcoach.Services;
-
+// Classe pour le service de podomètre
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -26,7 +26,6 @@ import com.example.fitcoach.widget.StepWidgetProvider;
 import java.text.DecimalFormat;
 
 public class StepCounterService extends Service implements SensorEventListener {
-
     public static final String ACTION_STEP_COUNT_UPDATE = "com.example.fitcoach.STEP_COUNT_UPDATE";
     public static final String EXTRA_STEP_COUNT = "step_count";
     private SensorManager sensorManager;
@@ -36,7 +35,7 @@ public class StepCounterService extends Service implements SensorEventListener {
     private static final float METRIC_WALKING_FACTOR = 0.708f;
     private DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-
+    // Méthode pour créer le service
     @Override
     public void onCreate() {
         super.onCreate();
@@ -48,6 +47,7 @@ public class StepCounterService extends Service implements SensorEventListener {
         currentSteps = appDataManager.getSteps(0);
     }
 
+    // Méthode appelée lors du démarrage du service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -80,7 +80,7 @@ public class StepCounterService extends Service implements SensorEventListener {
         return START_STICKY;
     }
 
-
+    // Méthode appelée lorsque le capteur détecte un changement
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
@@ -107,22 +107,26 @@ public class StepCounterService extends Service implements SensorEventListener {
         }
     }
 
+    // Méthode appelée lorsque la précision du capteur change
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         Log.d("StepCounterService", "onAccuracyChanged : accuracy changed :" + accuracy);
     }
 
+    // Méthode appelée lors de la destruction du service
     @Override
     public void onDestroy() {
         super.onDestroy();
         sensorManager.unregisterListener(this);
     }
 
+    // Méthode pour lier le service
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+    // Envoi d'une mise à jour du nombre de pas via un Intent
     private void sendStepCountUpdate() {
         Intent intent = new Intent(ACTION_STEP_COUNT_UPDATE);
         intent.putExtra(EXTRA_STEP_COUNT, currentSteps);
@@ -135,12 +139,13 @@ public class StepCounterService extends Service implements SensorEventListener {
         updateWidget();
     }
 
+    // Mise à jour du widget avec le nombre de pas et d'autres informations
     private void updateWidget(){
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         ComponentName componentName = new ComponentName(this, StepWidgetProvider.class);
 
         RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_step);
-        views.setTextViewText(R.id.steps_text, currentSteps+" pas");
+        views.setTextViewText(R.id.steps_text, currentSteps+" "+getString(R.string.General_pas));
         views.setProgressBar(R.id.step_progress_bar, appDataManager.getStepsObjective(appDataManager.getCompteId()), currentSteps, false);
 
         views.setTextViewText(R.id.distance_text, decimalFormat.format(appDataManager.getDistance(0))+" km");
@@ -149,11 +154,13 @@ public class StepCounterService extends Service implements SensorEventListener {
         appWidgetManager.updateAppWidget(componentName, views);
     }
 
+    // Méthode pour obtenir la date du jour au format "yyyy-MM-dd"
     private String getTodayDate() {
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
         return sdf.format(new java.util.Date());
     }
 
+    // Estimation de la longueur du pas en fonction de la taille et de l'activité (course ou marche)
     public float estimateStepLength(float height, boolean isRunning) {
         return isRunning ? height * 0.65f : height * 0.415f;
     }

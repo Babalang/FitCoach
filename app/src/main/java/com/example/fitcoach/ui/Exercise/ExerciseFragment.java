@@ -1,5 +1,5 @@
 package com.example.fitcoach.ui.Exercise;
-
+// Classe pour accéder à la map et lancer un exercice
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -57,7 +57,6 @@ public class ExerciseFragment extends Fragment {
     private LocationReceiver locationReceiver;
     private LocalBroadcastManager localBroadcastManager;
     private ServiceCheckReceiver serviceCheckReceiver;
-
     private boolean isServiceActive = false;
     private String currentSportType = null;
     private String currentExerciseType = null;
@@ -68,6 +67,8 @@ public class ExerciseFragment extends Fragment {
     private Location lastKnownLocation;
     private List<Marker> markers = new ArrayList<>();
 
+
+    // OnAttach est appelé lorsque le fragment est attaché à son activité
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -75,6 +76,7 @@ public class ExerciseFragment extends Fragment {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
+    // addfetchUserById2 est une méthode pour récupérer les informations d'un utilisateur par son ID et ajouter un marqueur sur la carte
     private void addfetchUserById2(String userId, String num) {
         ApiService apiService = RetrofitClient.getInstance();
         Call<User> call = apiService.getUserById(userId);
@@ -100,7 +102,6 @@ public class ExerciseFragment extends Fragment {
                     }
                 }
             }
-
             @Override
             public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                 Log.e(TAG, "Échec de l'appel getUserById " + userId + ": " + t.getMessage(), t);
@@ -108,6 +109,7 @@ public class ExerciseFragment extends Fragment {
         });
     }
 
+    // addfetchUserById est une méthode pour récupérer les informations d'un utilisateur par son ID et ajouter un marqueur sur la carte
     private void addfetchUserById(String userId) {
         ApiService apiService = RetrofitClient.getInstance();
         Call<User> call = apiService.getUserById(userId);
@@ -139,7 +141,6 @@ public class ExerciseFragment extends Fragment {
                     }
                 }
             }
-
             @Override
             public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                 Log.e(TAG, "Échec de l'appel getUserById " + userId + ": " + t.getMessage(), t);
@@ -147,6 +148,7 @@ public class ExerciseFragment extends Fragment {
         });
     }
 
+    // onCreateView est appelé pour créer la vue du fragment
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: called");
@@ -173,18 +175,17 @@ public class ExerciseFragment extends Fragment {
         return root;
     }
 
+    // checkServiceStatus vérifie si le service d'exercice est actif et envoie une demande de statut
     private void checkServiceStatus() {
         if (serviceCheckReceiver == null) {
             serviceCheckReceiver = new ServiceCheckReceiver();
         }
-
         if (!isReceiverRegistered) {
             IntentFilter filter = new IntentFilter(ExerciseService.ACTION_SEND_STATUS);
             localBroadcastManager.registerReceiver(serviceCheckReceiver, filter);
             isReceiverRegistered = true;
             Log.d(TAG, "Récepteur enregistré pour vérifier le statut du service");
         }
-
         Intent statusRequest = new Intent(ExerciseService.ACTION_REQUEST_STATUS);
         localBroadcastManager.sendBroadcast(statusRequest);
         Log.d(TAG, "Demande de statut envoyée au service");
@@ -196,6 +197,7 @@ public class ExerciseFragment extends Fragment {
         }, 1000);
     }
 
+    // navigateToInExercise navigue vers le fragment InExercise avec les paramètres actuels de sport et d'exercice
     private void navigateToInExercise() {
         Bundle bundle = new Bundle();
         bundle.putString("selected_sport", currentSportType != null ? currentSportType : "marche");
@@ -206,6 +208,7 @@ public class ExerciseFragment extends Fragment {
         Log.d(TAG, "Navigation directe vers l'exercice en cours: " + currentSportType + ", " + currentExerciseType);
     }
 
+    // ServiceCheckReceiver est un BroadcastReceiver qui écoute les réponses du service d'exercice
     private class ServiceCheckReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -213,19 +216,17 @@ public class ExerciseFragment extends Fragment {
                 isServiceActive = true;
                 currentSportType = intent.getStringExtra("sportType");
                 boolean isRunning = intent.getBooleanExtra("isRunning", true);
-
                 Log.d(TAG, "Réponse du service reçue - sport: " + currentSportType + ", isRunning: " + isRunning);
-
                 if (isServiceActive) {
                     currentExerciseType = (intent.getBooleanExtra("isChronoMode", true)) ? "chrono" : "timer";
                     navigateToInExercise();
                 }
-
                 unregisterServiceReceiver();
             }
         }
     }
 
+    // unregisterServiceReceiver désenregistre le récepteur de vérification de service
     private void unregisterServiceReceiver() {
         if (isReceiverRegistered && serviceCheckReceiver != null) {
             localBroadcastManager.unregisterReceiver(serviceCheckReceiver);
@@ -234,6 +235,7 @@ public class ExerciseFragment extends Fragment {
         }
     }
 
+    // onResume est appelé lorsque le fragment reprend son activité
     @Override
     public void onResume() {
         super.onResume();
@@ -243,12 +245,14 @@ public class ExerciseFragment extends Fragment {
         checkServiceStatus();
     }
 
+    // onPause est appelé lorsque le fragment est mis en pause
     @Override
     public void onPause() {
         super.onPause();
         map.onPause();
     }
 
+    // onDestroyView est appelé lorsque la vue du fragment est détruite
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -257,6 +261,7 @@ public class ExerciseFragment extends Fragment {
         binding = null;
     }
 
+    // LocationReceiver est un BroadcastReceiver qui écoute les mises à jour de position du service de localisation
     private class LocationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -272,6 +277,7 @@ public class ExerciseFragment extends Fragment {
         }
     }
 
+    // registerReceiver enregistre les récepteurs pour les mises à jour de position et le statut du service d'exercice
     private void registerReceiver() {
         if(!isReceiverRegistered){
             locationReceiver = new LocationReceiver();
@@ -288,6 +294,7 @@ public class ExerciseFragment extends Fragment {
         }
     }
 
+    // unregisterReceiver désenregistre les récepteurs pour les mises à jour de position et le statut du service d'exercice
     private void unregisterReceiver() {
         if (isReceiverRegistered) {
             localBroadcastManager.unregisterReceiver(locationReceiver);
@@ -300,6 +307,8 @@ public class ExerciseFragment extends Fragment {
             isReceiverRegistered = false;
         }
     }
+
+    // initPositionMarker initialise le marqueur de position de l'utilisateur sur la carte
     private void initPositionMarker() {
         myPositionMarker = new Marker(map);
         Drawable myIcon = ContextCompat.getDrawable(requireContext(), R.drawable.baseline_my_location_24);
@@ -308,6 +317,7 @@ public class ExerciseFragment extends Fragment {
         map.getOverlays().add(myPositionMarker);
     }
 
+    // updatePositionMarker met à jour la position du marqueur de l'utilisateur sur la carte
     private void updatePositionMarker(GeoPoint geoPoint) {
         if (myPositionMarker != null) {
             myPositionMarker.setPosition(geoPoint);
@@ -315,6 +325,7 @@ public class ExerciseFragment extends Fragment {
         }
     }
 
+    // addMarker ajoute un marqueur à la carte à une position géographique donnée avec un titre
     private void addMarker(GeoPoint geoPoint, String title) {
         Marker marker = new Marker(map);
         marker.setPosition(geoPoint);
@@ -325,6 +336,7 @@ public class ExerciseFragment extends Fragment {
         map.invalidate();
     }
 
+    // updateMarker met à jour la position d'un marqueur existant à un index donné
     private void updateMarker(GeoPoint geoPoint, int index) {
         if (index < 0 || index >= markers.size()) {
             Log.e(TAG, "updateMarker: Index out of bounds");
@@ -335,6 +347,8 @@ public class ExerciseFragment extends Fragment {
         map.invalidate();
         Log.d(TAG, "updateMarker: Marker updated at index " + index);
     }
+
+    // getLastLocation récupère la dernière position connue de l'utilisateur
     private void getLastLocation() {
         Log.d(TAG, "getLastLocation: function called");
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -362,6 +376,7 @@ public class ExerciseFragment extends Fragment {
                 });
     }
 
+    // enregistrerLocation enregistre la position actuelle de l'utilisateur dans la base de données
     private void enregistrerLocation(double longitude,double latitude){
         ApiService apiService = RetrofitClient.getInstance();
         AppDataManager appDataManager = AppDataManager.getInstance(getContext());
